@@ -1,0 +1,24 @@
+spring:
+  config:
+    import:
+      - security/application-client.yml
+      - security/application-database.yml
+      - security/application-keys.yml
+      - security/application-recommend.yml
+      - security/application-cors.yml
+      - security/application-weekly-price.yml
+    activate:
+      on-profile: local
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 1
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        show_sql: true
+    generate-ddl: false
