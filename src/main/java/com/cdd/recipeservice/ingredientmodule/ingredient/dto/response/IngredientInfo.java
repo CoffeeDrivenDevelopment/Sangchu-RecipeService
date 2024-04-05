@@ -1,7 +1,5 @@
 package com.cdd.recipeservice.ingredientmodule.ingredient.dto.response;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
 import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
@@ -26,7 +24,7 @@ public class IngredientInfo {
 
 	public static IngredientInfo from(List<RecommendIngredient> recommendIngredient) {
 		return IngredientInfo.builder()
-			.updateAt(LocalDateTimeUtils.timePattern(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
+			.updateAt(LocalDateTimeUtils.nowTimePattern("Asia/Seoul"))
 			.ingredients(recommendIngredient)
 			.build();
 	}
