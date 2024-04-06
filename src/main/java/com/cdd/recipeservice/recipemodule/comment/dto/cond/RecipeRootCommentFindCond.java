@@ -5,7 +5,7 @@ public record RecipeRootCommentFindCond(
 	int recipeId
 ) {
 
-	public static RecipeRootCommentFindCond searchRootComment(
+	public static RecipeRootCommentFindCond of(
 		final PagingCond pagingCond,
 		final int recipeId
 	) {
