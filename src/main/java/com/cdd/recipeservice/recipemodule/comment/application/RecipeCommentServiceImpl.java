@@ -14,7 +14,7 @@ import com.cdd.recipeservice.recipemodule.comment.domain.Comment;
 import com.cdd.recipeservice.recipemodule.comment.domain.CommentRepository;
 import com.cdd.recipeservice.recipemodule.comment.dto.MemberInfo;
 import com.cdd.recipeservice.recipemodule.comment.dto.cond.PagingCond;
-import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeCommentFindCond;
+import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeRootCommentFindCond;
 import com.cdd.recipeservice.recipemodule.comment.dto.request.RecipeCommentSaveRequest;
 import com.cdd.recipeservice.recipemodule.comment.dto.request.RecipeCommentUpdateRequest;
 import com.cdd.recipeservice.recipemodule.comment.dto.response.*;
@@ -145,7 +145,7 @@ public class RecipeCommentServiceImpl
 		final int recipeId
 	) {
 		List<Comment> findComments = commentRepository
-			.findCommentByCond(RecipeCommentFindCond.searchRootComment(cond, recipeId));
+			.findRootCommentByCond(RecipeRootCommentFindCond.searchRootComment(cond, recipeId));
 
 		List<MemberInfoResponse> memberInfos = getMemberInfos(passport, findComments);
 
@@ -181,7 +181,7 @@ public class RecipeCommentServiceImpl
 		final long commentId
 	) {
 		List<Comment> findReplyComments = commentRepository
-			.findCommentByCond(RecipeCommentFindCond.searchReplyComment(cond, commentId));
+			.findRootCommentByCond(RecipeRootCommentFindCond.searchRootComment(cond, (int)commentId));
 
 		List<MemberInfoResponse> memberInfos = getMemberInfos(passport, findReplyComments);
 
