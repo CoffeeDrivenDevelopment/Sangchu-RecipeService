@@ -14,7 +14,8 @@ import com.cdd.recipeservice.recipemodule.comment.domain.Comment;
 import com.cdd.recipeservice.recipemodule.comment.domain.CommentRepository;
 import com.cdd.recipeservice.recipemodule.comment.dto.MemberInfo;
 import com.cdd.recipeservice.recipemodule.comment.dto.cond.PagingCond;
-import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeCommentFindCond;
+import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeReplyCommentFindCond;
+import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeRootCommentFindCond;
 import com.cdd.recipeservice.recipemodule.comment.dto.request.RecipeCommentSaveRequest;
 import com.cdd.recipeservice.recipemodule.comment.dto.request.RecipeCommentUpdateRequest;
 import com.cdd.recipeservice.recipemodule.comment.dto.response.*;
@@ -145,13 +146,14 @@ public class RecipeCommentServiceImpl
 		final int recipeId
 	) {
 		List<Comment> findComments = commentRepository
-			.findCommentByCond(RecipeCommentFindCond.searchRootComment(cond, recipeId));
+			.findRootCommentByCond(RecipeRootCommentFindCond.of(cond, recipeId));
 
 		List<MemberInfoResponse> memberInfos = getMemberInfos(passport, findComments);
 
 		List<RecipeRootCommentResponse> recipeRootCommentResponses = getRecipeRootComments(findComments, memberInfos);
 		long lastCommentId = getLastCommentId(findComments);
-		boolean hasMore = commentRepository.hasMoreCommentById(lastCommentId);
+		boolean hasMore = commentRepository.hasMoreCommentByCond(
+			RecipeRootCommentFindCond.of(new PagingCond(lastCommentId, 1), recipeId));
 
 		return FindRecipeCommentResponse.of(recipeRootCommentResponses, hasMore, lastCommentId);
 	}
@@ -181,14 +183,15 @@ public class RecipeCommentServiceImpl
 		final long commentId
 	) {
 		List<Comment> findReplyComments = commentRepository
-			.findCommentByCond(RecipeCommentFindCond.searchReplyComment(cond, commentId));
+			.findReplyCommentByCond(RecipeReplyCommentFindCond.of(cond, commentId));
 
 		List<MemberInfoResponse> memberInfos = getMemberInfos(passport, findReplyComments);
 
 		List<RecipeReplyCommentResponse> recipeReplyCommentsResponse =
 			getRecipeReplyComments(findReplyComments, memberInfos);
 		long lastCommentId = getLastCommentId(findReplyComments);
-		boolean hasMore = commentRepository.hasMoreCommentById(lastCommentId);
+		boolean hasMore = commentRepository.hasMoreReplyCommentById(
+			RecipeReplyCommentFindCond.of(new PagingCond(lastCommentId, 1), commentId));
 
 		return FindRecipeReplyCommentResponse.of(recipeReplyCommentsResponse, hasMore, lastCommentId);
 	}
