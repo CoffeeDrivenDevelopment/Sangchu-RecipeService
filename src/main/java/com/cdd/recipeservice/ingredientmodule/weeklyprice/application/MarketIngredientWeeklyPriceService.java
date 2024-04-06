@@ -102,8 +102,8 @@ public class MarketIngredientWeeklyPriceService {
 	}
 
 	private double calculatePercent(List<WeeklyPrice> data) {
-		int todayPrice = data.get(0).getPrice();
-		int lastWeekPrice = data.get(1).getPrice();
+		int todayPrice = data.get(data.size()-1).getPrice();
+		int lastWeekPrice = data.get(data.size()-2).getPrice();
 		double percent = (todayPrice - lastWeekPrice) / (double)lastWeekPrice * 100;
 		return Math.round(percent * 100.0) / 100.0;
 	}

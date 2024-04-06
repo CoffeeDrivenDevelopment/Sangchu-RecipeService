@@ -2,10 +2,7 @@ package com.cdd.recipeservice.ingredientmodule.weeklyprice.utils;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.IntFunction;
 
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.PriceCalculator;
@@ -50,6 +47,7 @@ public class IngredientWeeklyPriceUtils {
 			List<WeeklyPrice> pricesPerWeek = initializeWeeklyPrices(week, today, unit);
 			sumPrices(pricesPerWeek, ingredientSalesPrices, week);
 			averagePrices(pricesPerWeek, week);
+			Collections.sort(pricesPerWeek, Comparator.comparing(WeeklyPrice::getDate));
 			weeklyPrices.put(week, pricesPerWeek);
 		}
 
