@@ -32,7 +32,7 @@ public class IngredientWeeklyPriceResponse {
 			.updateAt(LocalDateTimeUtils.timePattern(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
 			.data(WeeklyPriceResponse.toList(data))
 			.today(Today.builder()
-				.price(data.get(0).getPrice())
+				.price(data.get(data.size()-1).getPrice())
 				.percent(percent)
 				.build())
 			.build();
