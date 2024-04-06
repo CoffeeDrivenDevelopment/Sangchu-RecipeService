@@ -7,7 +7,7 @@ import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 
 public interface MarketRepositoryCustom {
-	List<ClosestMarket> getClosestMarketPriceList(int ingredientId, double lat, double lng, double distance);
-	List<OnlineMarket>findMinPriceByIngredientIdAndOnlineMarkets(int ingredientId);
+	List<ClosestMarket> findClosestMarketPrices(int ingredientId, double lat, double lng, double distance, int limit);
+	List<OnlineMarket>findMinPriceByIngredientIdAndOnlineMarkets(int ingredientId,int limit);
 	List<WeeklyPrice> findWeeklyPriceByIngredientIdAndMarketId(int ingredientId, int id);
 }

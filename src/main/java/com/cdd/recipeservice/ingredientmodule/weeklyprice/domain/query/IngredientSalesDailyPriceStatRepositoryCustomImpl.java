@@ -4,10 +4,10 @@ import static com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.QIngredi
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond.PriceSearchCond;
@@ -21,13 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 	implements IngredientSalesDailyPriceStatRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
+	private static final String ZONE = "Asia/Seoul";
 
 	@Override
 	public List<IngredientSalesDailyPriceStat> findByIdTypeAndWeek(PriceSearchCond cond) {
+		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
 		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.ingredient.id.eq(cond.getId())
 				.and(ingredientSalesDailyPriceStat.marketType.eq(cond.getType()))
-				.and(ingredientSalesDailyPriceStat.createdAt.after(cond.getWeek()))
+				.and(ingredientSalesDailyPriceStat.createdAt.between(cond.getWeek(),
+					today.plusDays(1L).minusSeconds(1L)))
 			)
 			.orderBy(ingredientSalesDailyPriceStat.createdAt.desc())
 			.fetch();
@@ -45,46 +48,38 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 
 	@Override
 	public Optional<Integer> findMinPriceByIngredientIdAndMarket(int ingredientId, MarketType marketType) {
+		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
 		return Optional.ofNullable(jpaQueryFactory
 			.select(ingredientSalesDailyPriceStat.minPrice)
 			.from(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.marketType.eq(marketType)
 				.and(ingredientSalesDailyPriceStat.ingredient.id.eq(ingredientId))
+				.and(ingredientSalesDailyPriceStat.createdAt.between(today, today.plusDays(1L).minusSeconds(1L))
+				)
 			)
-			.orderBy(ingredientSalesDailyPriceStat.createdAt.desc())
 			.fetchFirst()
 		);
 	}
 
 	@Override
 	public List<Integer> findPricesBetweenTodayAnd7DaysAGo(int id) {
-		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
 		LocalDateTime sevenDaysAgo = today.minusDays(7);
 		return jpaQueryFactory.select(ingredientSalesDailyPriceStat.avgPrice)
 			.from(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.ingredient.id.eq(id)
 				.and(ingredientSalesDailyPriceStat.marketType.eq(MarketType.OFFLINE))
-				.and(ingredientSalesDailyPriceStat.createdAt.between(sevenDaysAgo, today))
+				.and(ingredientSalesDailyPriceStat.createdAt.between(sevenDaysAgo, today.plusDays(1L).minusSeconds(1L)))
 			)
 			.orderBy(ingredientSalesDailyPriceStat.createdAt.desc())
 			.fetch();
 	}
 
 	@Override
-	public List<Integer> findOnlinePriceList(int ingredientId) {
+	public List<Integer> findMarketPriceList(int ingredientId, MarketType marketType) {
 		return jpaQueryFactory.select(ingredientSalesDailyPriceStat.minPrice)
 			.from(ingredientSalesDailyPriceStat)
-			.where(ingredientSalesDailyPriceStat.marketType.eq(MarketType.ONLINE)
-				.and(ingredientSalesDailyPriceStat.ingredient.id.eq(ingredientId)))
-			.limit(30)
-			.fetch();
-	}
-
-	@Override
-	public List<Integer> findOfflinePriceList(int ingredientId) {
-		return jpaQueryFactory.select(ingredientSalesDailyPriceStat.minPrice)
-			.from(ingredientSalesDailyPriceStat)
-			.where(ingredientSalesDailyPriceStat.marketType.eq(MarketType.OFFLINE)
+			.where(ingredientSalesDailyPriceStat.marketType.eq(marketType)
 				.and(ingredientSalesDailyPriceStat.ingredient.id.eq(ingredientId)))
 			.limit(30)
 			.fetch();
@@ -95,7 +90,7 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.createdAt.between(
 						day.atStartOfDay(),
-						day.plusDays(1).atStartOfDay()
+						day.plusDays(2).atStartOfDay().minusSeconds(1L)
 					)
 					.and(ingredientSalesDailyPriceStat.marketType
 						.eq(MarketType.ONLINE)

@@ -1,8 +1,7 @@
 package com.cdd.recipeservice.recipemodule.recipe.utils;
 
-import java.time.LocalDateTime;
-
 import com.cdd.recipeservice.global.annotation.Mapper;
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.recipemodule.recipe.domain.Recipe;
 import com.cdd.recipeservice.recipemodule.recipe.domain.RecipeLike;
 
@@ -13,7 +12,7 @@ public class RecipeLikeMapper {
 		return RecipeLike.builder()
 			.memberId(memberId)
 			.recipe(recipe)
-			.viewedAt(LocalDateTime.now())
+			.viewedAt(LocalDateTimeUtils.today("Asia/Seoul"))
 			.build();
 	}
 }

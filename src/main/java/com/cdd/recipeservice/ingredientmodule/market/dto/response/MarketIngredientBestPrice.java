@@ -12,4 +12,5 @@ public class MarketIngredientBestPrice {
 	private String marketLink;
 	@JsonProperty("price")
 	private int price;
+
 }

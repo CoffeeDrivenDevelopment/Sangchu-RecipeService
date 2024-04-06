@@ -17,9 +17,7 @@ public interface IngredientSalesDailyPriceStatRepositoryCustom {
 
 	List<Integer> findPricesBetweenTodayAnd7DaysAGo(int id);
 
-	List<Integer> findOnlinePriceList(int ingredientId);
-
-	List<Integer> findOfflinePriceList(int ingredientId);
+	List<Integer> findMarketPriceList(int ingredientId, MarketType marketType);
 
 	List<IngredientSalesDailyPriceStat> findIngredientDailyPrice(LocalDate day);
 }

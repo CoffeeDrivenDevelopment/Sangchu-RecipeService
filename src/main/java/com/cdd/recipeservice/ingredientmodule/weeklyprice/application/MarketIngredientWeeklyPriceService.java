@@ -18,7 +18,7 @@ import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketPricePerUserResponse;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
-import com.cdd.recipeservice.ingredientmodule.market.utils.ClosestMarketUtils;
+import com.cdd.recipeservice.ingredientmodule.market.utils.MarketIngredientLowestPriceUtils;
 import com.cdd.recipeservice.ingredientmodule.targetprice.domain.TargetPriceRepository;
 import com.cdd.recipeservice.ingredientmodule.targetprice.utils.TargetPriceUtils;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
@@ -71,13 +71,14 @@ public class MarketIngredientWeeklyPriceService {
 
 	public MarketPricePerUserResponse getIngredientPriceOfflineMarket(int memberId, int ingredientId, double lat,
 		double lng) {
-		List<ClosestMarket> closestMarkets = ClosestMarketUtils.getClosestMarketPriceList(
+		List<ClosestMarket> closestMarkets = MarketIngredientLowestPriceUtils.getClosestMarketPrices(
 			marketRepository,
 			ingredientId,
 			lat,
 			lng,
 			2);
-		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(targetPriceRepository, memberId, ingredientId,0);
+		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(targetPriceRepository, memberId, ingredientId,
+			0);
 		int todayMinimumPrice = IngredientSalesDailyPriceStatUtils.findMinPriceByIngredientIdAndMarket(
 			ingredientSalesDailyPriceStatRepository,
 			ingredientId, MarketType.OFFLINE);
@@ -86,8 +87,6 @@ public class MarketIngredientWeeklyPriceService {
 			List<WeeklyPrice> weeklyPrices = marketRepository.findWeeklyPriceByIngredientIdAndMarketId(
 				ingredientId,
 				closestMarkets.get(i).getId());
-			// List<ClosestMarket> closestMarketPrices = IngredientWeeklyPriceUtils.generateIngredientSalesPriceDummyData(
-			// 	ClosestMarket::new, 28);
 			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
 				weeklyPrices,
 				weeks,
@@ -102,8 +101,8 @@ public class MarketIngredientWeeklyPriceService {
 	}
 
 	private double calculatePercent(List<WeeklyPrice> data) {
-		int todayPrice = data.get(data.size()-1).getPrice();
-		int lastWeekPrice = data.get(data.size()-2).getPrice();
+		int todayPrice = data.get(data.size() - 1).getPrice();
+		int lastWeekPrice = data.get(data.size() - 2).getPrice();
 		double percent = (todayPrice - lastWeekPrice) / (double)lastWeekPrice * 100;
 		return Math.round(percent * 100.0) / 100.0;
 	}
@@ -115,11 +114,9 @@ public class MarketIngredientWeeklyPriceService {
 		int endId = id + (int)ingredientInxInfo.getTotalCnt();
 		for (; id <= endId; id++) {
 
-			PriceSearchCond cond = new PriceSearchCond(id, type, 4);
-			// List<IngredientSalesDailyPriceStat> ingredientSalesPriceList = IngredientWeeklyPriceUtils.generateIngredientSalesPriceDummyData(
-			// 	IngredientSalesDailyPriceStat::new, 28);
-			List<IngredientSalesDailyPriceStat> ingredientSalesPriceList = ingredientSalesDailyPriceStatRepository.findByIdTypeAndWeek(
-				cond);
+			PriceSearchCond cond = new PriceSearchCond(id, type, 4L);
+			List<IngredientSalesDailyPriceStat> ingredientSalesPriceList = ingredientSalesDailyPriceStatRepository
+				.findByIdTypeAndWeek(cond);
 			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
 				ingredientSalesPriceList,
 				weeks,
@@ -134,11 +131,17 @@ public class MarketIngredientWeeklyPriceService {
 	}
 
 	public MarketPricePerUserResponse getIngredientPriceOnlineMarket(int memberId, int ingredientId) {
-		List<OnlineMarket> onlineMarkets = marketRepository.findMinPriceByIngredientIdAndOnlineMarkets(ingredientId);
-		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(targetPriceRepository, memberId, ingredientId,0);
+		List<OnlineMarket> onlineMarkets = marketRepository.findMinPriceByIngredientIdAndOnlineMarkets(ingredientId, 3);
+		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(
+			targetPriceRepository,
+			memberId,
+			ingredientId,
+			0);
+
 		int todayMinimumPrice = IngredientSalesDailyPriceStatUtils.findMinPriceByIngredientIdAndMarket(
 			ingredientSalesDailyPriceStatRepository,
-			ingredientId, MarketType.ONLINE);
+			ingredientId,
+			MarketType.ONLINE);
 
 		List<Map<Integer, List<WeeklyPrice>>> marketPriceList = new ArrayList<>();
 
@@ -147,8 +150,6 @@ public class MarketIngredientWeeklyPriceService {
 				ingredientId,
 				onlineMarkets.get(i).getId()
 			);
-			// List<ClosestMarket> closestMarketPrices = IngredientWeeklyPriceUtils.generateIngredientSalesPriceDummyData(
-			// 	ClosestMarket::new, 28);
 			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
 				weeklyPrices,
 				weeks,

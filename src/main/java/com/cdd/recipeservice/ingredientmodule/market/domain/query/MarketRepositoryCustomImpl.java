@@ -5,6 +5,7 @@ import static com.cdd.recipeservice.ingredientmodule.market.domain.QMarketIngred
 import static com.cdd.recipeservice.ingredientmodule.market.domain.QMarketIngredientSalesPrice.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
@@ -29,7 +30,8 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<ClosestMarket> getClosestMarketPriceList(int ingredientId, double lat, double lng, double distance) {
+	public List<ClosestMarket> findClosestMarketPrices(int ingredientId, double lat, double lng, double distance,
+		int limit) {
 		return jpaQueryFactory
 			.select(new QClosestMarket(
 					market.id,
@@ -53,6 +55,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 				.and(isCloseThan(lat, lng, distance))
 			)
 			.distinct()
+			.limit(limit)
 			.fetch();
 	}
 
@@ -74,21 +77,32 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	}
 
 	@Override
-	public List<OnlineMarket> findMinPriceByIngredientIdAndOnlineMarkets(int ingredientId) {
+	public List<OnlineMarket> findMinPriceByIngredientIdAndOnlineMarkets(
+		int ingredientId,
+		int limit
+	) {
+		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
+			.toLocalDate().atStartOfDay();
 		return jpaQueryFactory.select(new QOnlineMarket(
 				market.id,
 				market.name,
-				marketIngredientSalesPrice.price
+				marketIngredientSalesPrice.price,
+				marketIngredientSalesPrice.salesLink
 			))
 			.from(market)
 			.innerJoin(marketIngredient)
 			.on(marketIngredient.ingredient.id.eq(ingredientId))
 			.innerJoin(marketIngredientSalesPrice)
 			.on(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id))
-			.where(market.type.eq(MarketType.ONLINE))
-			.distinct()
+			.where(market.type.eq(MarketType.ONLINE)
+				.and(marketIngredientSalesPrice.createdAt.between(
+						today,
+						today.plusDays(2L).minusSeconds(1L)
+					)
+				)
+			)
 			.orderBy(marketIngredientSalesPrice.price.asc())
-			.limit(3)
+			.limit(limit)
 			.fetch();
 	}
 
@@ -97,7 +111,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 		return jpaQueryFactory.select(new QWeeklyPrice(
 				marketIngredientSalesPrice.createdAt,
 				marketIngredientSalesPrice.price
-				))
+			))
 			.from(market)
 			.innerJoin(marketIngredient)
 			.on(marketIngredient.ingredient.id.eq(ingredientId))

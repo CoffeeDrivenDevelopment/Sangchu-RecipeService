@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.global.utils.RedisUtils;
 import com.cdd.recipeservice.ingredientmodule.ingredient.domain.IngredientRepository;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientPriceGapList;
@@ -52,7 +53,7 @@ public class IngredientGapService {
 
 	@Scheduled(cron = "0 0 0 * * *")
 	public void saveIngredientPriceGap() {
-		LocalDate today = LocalDate.now();
+		LocalDate today = LocalDateTimeUtils.today("Asia/Seoul").toLocalDate();
 		List<IngredientSalesDailyPriceStat> todayList =
 			ingredientSalesDailyPriceStatRepository.findIngredientDailyPrice(today);
 		List<IngredientSalesDailyPriceStat> yesterdayList =
