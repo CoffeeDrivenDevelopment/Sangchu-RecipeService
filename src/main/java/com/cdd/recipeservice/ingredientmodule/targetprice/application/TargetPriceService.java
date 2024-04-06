@@ -12,6 +12,7 @@ import com.cdd.recipeservice.global.utils.RedisUtils;
 import com.cdd.recipeservice.ingredientmodule.ingredient.domain.Ingredient;
 import com.cdd.recipeservice.ingredientmodule.ingredient.domain.IngredientRepository;
 import com.cdd.recipeservice.ingredientmodule.ingredient.utils.IngredientUtils;
+import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.targetprice.domain.TargetPrice;
 import com.cdd.recipeservice.ingredientmodule.targetprice.domain.TargetPriceInfoList;
 import com.cdd.recipeservice.ingredientmodule.targetprice.domain.TargetPriceRepository;
@@ -120,13 +121,14 @@ public class TargetPriceService
 
 	private void updateTargetPriceList(List<TargetPriceInfo> targetPriceList) {
 		int size = targetPriceList.size();
-		if (size >= 10) return;
+		if (size >= 10)
+			return;
 
 		int firstPrice = targetPriceList.get(0).getPrice();
 		int lastPrice = targetPriceList.get(size - 1).getPrice();
 		int unit = (firstPrice - lastPrice) / (10 - size);
-		if(unit==0){
-			unit = firstPrice/20;
+		if (unit == 0) {
+			unit = firstPrice / 20;
 		}
 
 		for (int i = 1; i <= 10 - size; i++) {
@@ -153,10 +155,12 @@ public class TargetPriceService
 		List<TargetPriceItemResponse> targetPriceItemList = new ArrayList<>();
 
 		for (TargetPrice targetPrice : targetPriceList) {
-			List<Integer> onlinePriceList = ingredientSalesDailyPriceStatRepository.findOnlinePriceList(
-				targetPrice.getIngredient().getId());
-			List<Integer> offlinePriceList = ingredientSalesDailyPriceStatRepository.findOfflinePriceList(
-				targetPrice.getIngredient().getId());
+			List<Integer> onlinePriceList = ingredientSalesDailyPriceStatRepository.findMarketPriceList(
+				targetPrice.getIngredient().getId(),
+				MarketType.ONLINE);
+			List<Integer> offlinePriceList = ingredientSalesDailyPriceStatRepository.findMarketPriceList(
+				targetPrice.getIngredient().getId(),
+				MarketType.OFFLINE);
 			targetPriceItemList.add(TargetPriceItemResponse.builder()
 				.ingredientId(targetPrice.getIngredient().getId())
 				.ingredientName(targetPrice.getIngredient().getName())

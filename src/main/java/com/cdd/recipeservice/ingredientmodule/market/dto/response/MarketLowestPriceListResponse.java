@@ -16,16 +16,16 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @NoArgsConstructor
-public class OfflineMarketLowestPriceListResponse {
+public class MarketLowestPriceListResponse<T> {
 	@JsonProperty("updateAt")
 	String updateAt;
 	@JsonProperty("markets")
-	List<ClosestMarket> markets;
+	List<T> markets;
 
-	public static OfflineMarketLowestPriceListResponse from(
-		final List<ClosestMarket> markets) {
-		return OfflineMarketLowestPriceListResponse.builder()
-			.updateAt(LocalDateTimeUtils.timePattern(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
+	public static <T> MarketLowestPriceListResponse<T> from(
+		final List<T> markets) {
+		return MarketLowestPriceListResponse.<T>builder()
+			.updateAt(LocalDateTimeUtils.nowTimePattern("Asia/Seoul"))
 			.markets(markets)
 			.build();
 	}

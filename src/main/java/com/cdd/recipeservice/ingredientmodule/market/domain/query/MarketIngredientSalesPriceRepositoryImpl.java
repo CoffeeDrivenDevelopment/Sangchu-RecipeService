@@ -5,6 +5,7 @@ import static com.cdd.recipeservice.ingredientmodule.market.domain.QMarketIngred
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketIngredientSalesPrice;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -15,12 +16,15 @@ public class MarketIngredientSalesPriceRepositoryImpl implements MarketIngredien
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public Optional<MarketIngredientSalesPrice> findMarketIngredientSalesPriceByToday(long marketIngredientId){
+	public Optional<MarketIngredientSalesPrice> findMarketIngredientSalesPriceByToday(long marketIngredientId) {
+		LocalDateTime today = LocalDateTimeUtils.today("Asia/Seoul").toLocalDate().atStartOfDay();
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(marketIngredientSalesPrice)
 			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredientId)
-				.and(marketIngredientSalesPrice.createdAt.year().eq(LocalDateTime.now().getYear())
-					.and(marketIngredientSalesPrice.createdAt.month().eq(LocalDateTime.now().getMonthValue())
-						.and(marketIngredientSalesPrice.createdAt.dayOfMonth().eq(LocalDateTime.now().getDayOfMonth())))))
+				.and(marketIngredientSalesPrice.createdAt.between(
+					today.toLocalDate().atStartOfDay(),
+					today.plusDays(1L).minusSeconds(1L))
+				)
+			)
 			.fetchFirst());
 	}
 }

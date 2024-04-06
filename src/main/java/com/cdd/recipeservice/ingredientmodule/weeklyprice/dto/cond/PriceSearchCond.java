@@ -2,6 +2,7 @@ package com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond;
 
 import java.time.*;
 
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.*;
 import com.fasterxml.jackson.annotation.*;
 
@@ -16,9 +17,8 @@ public class PriceSearchCond {
 	@JsonProperty("week")
 	private LocalDateTime week;
 
-	public PriceSearchCond(int id, String type, int week) {
-		ZoneId zoneId = ZoneId.of("Asia/Seoul");
-		this.week = LocalDate.now(zoneId).minusWeeks(week).atStartOfDay();
+	public PriceSearchCond(int id, String type, long week) {
+		this.week = LocalDateTimeUtils.today("Asia/Seoul").minusWeeks(week);
 		this.id = id;
 		this.type = MarketType.valueOf(type.toUpperCase());
 	}

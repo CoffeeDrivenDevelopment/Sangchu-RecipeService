@@ -7,8 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
-import com.cdd.recipeservice.ingredientmodule.market.dto.response.OfflineMarketLowestPriceListResponse;
-import com.cdd.recipeservice.ingredientmodule.market.utils.ClosestMarketUtils;
+import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketLowestPriceListResponse;
+import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
+import com.cdd.recipeservice.ingredientmodule.market.utils.MarketIngredientLowestPriceUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -22,17 +23,25 @@ public class MarketLowestPriceService {
 	 *
 	 * 사용자 위치 3km이내에서 가장 가깝고 싼 시장 3개 가져오기
 	 */
-	public OfflineMarketLowestPriceListResponse getOfflineMarketLowestPrice(
+	public MarketLowestPriceListResponse<ClosestMarket> getOfflineMarketLowestPrice(
 		final int ingredientId,
 		final double lat,
 		final double lng) {
 		// 3km 이내 시장 3개 가져오기
-		List<ClosestMarket> clostMarketList = ClosestMarketUtils.getClosestMarketPriceList(
+		List<ClosestMarket> closestMarketPrices = MarketIngredientLowestPriceUtils.getClosestMarketPrices(
 			marketRepository,
 			ingredientId,
 			lat,
 			lng,
 			3);
-		return OfflineMarketLowestPriceListResponse.from(clostMarketList);
+		return MarketLowestPriceListResponse.from(closestMarketPrices);
+	}
+
+	public MarketLowestPriceListResponse<OnlineMarket> getOnlineMarketLowestPrice(int ingredientId) {
+		List<OnlineMarket> onlineMarketPrices = MarketIngredientLowestPriceUtils.getOnlineMarketPrices(
+			marketRepository,
+			ingredientId,
+			Integer.MAX_VALUE);
+		return MarketLowestPriceListResponse.from(onlineMarketPrices);
 	}
 }

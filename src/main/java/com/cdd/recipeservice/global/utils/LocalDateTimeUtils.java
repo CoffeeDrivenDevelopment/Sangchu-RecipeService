@@ -11,6 +11,9 @@ public class LocalDateTimeUtils {
 		throw new CallConstructorException();
 	}
 
+	public static LocalDateTime today(String zoneId){
+		return LocalDateTime.now(ZoneId.of(zoneId));
+	}
 	public static String pattern(LocalDateTime time) {
 		return time.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
 	}
@@ -20,6 +23,6 @@ public class LocalDateTimeUtils {
 	}
 
 	public static String nowTimePattern(String zoneId) {
-		return timePattern(LocalDateTime.now(ZoneId.of(zoneId)));
+		return timePattern(today(zoneId));
 	}
 }
