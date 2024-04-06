@@ -1,5 +1,7 @@
 package com.cdd.recipeservice.recipemodule.recipe.application;
 
+import java.util.List;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -9,9 +11,9 @@ import com.cdd.recipeservice.recipemodule.recipe.domain.Recipe;
 import com.cdd.recipeservice.recipemodule.recipe.domain.RecipeLike;
 import com.cdd.recipeservice.recipemodule.recipe.domain.RecipeLikeRepository;
 import com.cdd.recipeservice.recipemodule.recipe.domain.RecipeRepository;
-import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeLikeDetailResponse;
-import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeLikeListResponse;
 import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeLikeResponse;
+import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeSearchInfo;
+import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeSearchResponse;
 import com.cdd.recipeservice.recipemodule.recipe.exception.RecipeErrorCode;
 import com.cdd.recipeservice.recipemodule.recipe.exception.RecipeException;
 import com.cdd.recipeservice.recipemodule.recipe.utils.RecipeLikeMapper;
@@ -69,17 +71,17 @@ public class RecipeLikeService
 	}
 
 	@Override
-	public RecipeLikeListResponse getLikeRecipeList(int memberId, Pageable pageable) {
+	public RecipeSearchResponse getLikeRecipeList(int memberId, Pageable pageable) {
+		// TODO: 팔로워인지? 자신인지? 체크로직 필요
 		Page<Recipe> recipePageList = recipeLikeRepository.findByMemberId(memberId, pageable);
-		Page<RecipeLikeDetailResponse> recipeList = recipePageList.map(recipe -> RecipeLikeDetailResponse.builder()
-			.recipeId(recipe.getId())
-			.title(recipe.getTitle())
-			.image(recipe.getImage())
-			.createdAt(recipe.getCreatedAt())
-			.cookingTime(recipe.getCookingTime())
-			.recipeCategory(recipe.getRecipeCategory().getDesc())
-			.cookingDifficulty(recipe.getCookingDifficulty())
-			.build());
-		return RecipeLikeListResponse.from(recipeList);
+		List<RecipeSearchInfo> recipeListList = recipePageList.getContent().stream()
+			.map(recipe-> RecipeSearchInfo.of(recipe,true))
+			.toList();
+		return new RecipeSearchResponse(
+			recipeListList,
+			recipePageList.getTotalElements(),
+			0,
+			recipePageList.getPageable().getPageNumber()!= pageable.getPageNumber());
+
 	}
 }

@@ -15,9 +15,15 @@ public interface RecipeLikeRepository extends JpaRepository<RecipeLike, Long>, R
 
 	Optional<RecipeLike> findRecipeLikeByMemberIdAndRecipe(int memberId, Recipe recipe);
 
-	@Query("SELECT r "
-		+ "FROM RecipeLike rl "
-		+ "JOIN Recipe r "
-		+ "ON rl.memberId = :memberId")
+	@Query(
+		value = "SELECT r " +
+			"FROM RecipeLike rl " +
+			"JOIN Recipe r " +
+			"ON rl.recipe.id = r.id " +
+			"WHERE rl.memberId = :memberId",
+		countQuery =
+			"SELECT COUNT(rl) "
+				+ "FROM RecipeLike rl "
+				+ "where rl.memberId = :memberId")
 	Page<Recipe> findByMemberId(@Param("memberId") int memberId, Pageable pageable);
 }
