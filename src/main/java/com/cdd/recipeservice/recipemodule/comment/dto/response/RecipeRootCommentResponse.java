@@ -29,7 +29,7 @@ public class RecipeRootCommentResponse implements RecipeCommentResponse {
 			.commentId(comment.getId())
 			.content(comment.getContent())
 			.lastUpdatedTime(LocalDateTimeUtils.pattern(comment.getUpdatedAt()))
-			.replyCount(comment.getReplyCount())
+			.replyCount(getReplyCount(comment))
 			.member(member.toMemberInfo())
 			.build();
 	}
@@ -39,8 +39,12 @@ public class RecipeRootCommentResponse implements RecipeCommentResponse {
 			.commentId(comment.getId())
 			.content(comment.getContent())
 			.lastUpdatedTime(LocalDateTimeUtils.pattern(comment.getUpdatedAt()))
-			.replyCount(comment.getReplyCount())
+			.replyCount(getReplyCount(comment))
 			.member(MemberInfo.deleteComment())
 			.build();
+	}
+
+	private static int getReplyCount(Comment comment) {
+		return comment.getReplyCount() == null ? 0 : comment.getReplyCount();
 	}
 }
