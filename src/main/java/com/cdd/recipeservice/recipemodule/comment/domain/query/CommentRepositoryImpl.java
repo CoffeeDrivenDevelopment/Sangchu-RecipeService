@@ -21,6 +21,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 		return query.selectFrom(comment)
 			.join(comment.recipe, recipe)
 			.where(recipe.id.eq(cond.recipeId())
+				.and(comment.parentComment.isNull())
 				.and(comment.id.lt(cond.pagingCond().last())
 				))
 			.orderBy(comment.id.desc())
@@ -30,7 +31,13 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
 	@Override
 	public boolean hasMoreCommentByCond(RecipeRootCommentFindCond cond) {
-		return false;
+		return cond.pagingCond().last() != -1 && query.selectFrom(comment)
+			.join(comment.recipe, recipe)
+			.where(recipe.id.eq(cond.recipeId())
+				.and(comment.parentComment.isNull())
+				.and(comment.id.lt(cond.pagingCond().last())
+				))
+			.fetchFirst() != null;
 	}
 
 	@Override
