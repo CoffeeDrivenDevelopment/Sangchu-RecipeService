@@ -2,7 +2,7 @@ package com.cdd.recipeservice.recipemodule.comment.dto.cond;
 
 public record RecipeRootCommentFindCond(
 	PagingCond pagingCond,
-	long recipeId
+	int recipeId
 ) {
 
 	public static RecipeRootCommentFindCond searchRootComment(

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.cdd.recipeservice.recipemodule.comment.domain.Comment;
+import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeReplyCommentFindCond;
 import com.cdd.recipeservice.recipemodule.comment.dto.cond.RecipeRootCommentFindCond;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -28,9 +29,19 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 	public List<Comment> findRootCommentByCond(final RecipeRootCommentFindCond cond) {
 		return query.selectFrom(comment)
 			.join(comment.recipe, recipe)
-			.where(recipe.id.eq((int)cond.recipeId())
+			.where(recipe.id.eq(cond.recipeId())
 				.and(comment.id.lt(cond.pagingCond().last())
 				))
+			.orderBy(comment.id.desc())
+			.limit(cond.pagingCond().size())
+			.fetch();
+	}
+
+	@Override
+	public List<Comment> findReplyCommentByCond(RecipeReplyCommentFindCond cond) {
+		return query.selectFrom(comment)
+			.where(comment.parentComment.id.eq(cond.commentId())
+				.and(comment.id.lt(cond.pagingCond().last())))
 			.orderBy(comment.id.desc())
 			.limit(cond.pagingCond().size())
 			.fetch();
