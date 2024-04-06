@@ -2,18 +2,15 @@ package com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.query;
 
 import static com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.QIngredientSalesDailyPriceStat.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond.PriceSearchCond;
-import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.response.IngredientPriceGap;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -94,53 +91,16 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 	}
 
 	@Override
-	public List<IngredientPriceGap> findIngredientDailyPrice(boolean asc) {
-		List<IngredientSalesDailyPriceStat> todaylist = jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
-			.where(ingredientSalesDailyPriceStat.createdAt.year()
-				.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).getYear())
-				.and(ingredientSalesDailyPriceStat.createdAt.month()
-					.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).getMonth().getValue()))
-				.and(ingredientSalesDailyPriceStat.createdAt.dayOfMonth()
-					.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).getDayOfMonth())
-					.and(ingredientSalesDailyPriceStat.marketType.eq(MarketType.ONLINE)))
+	public List<IngredientSalesDailyPriceStat> findIngredientDailyPrice(LocalDate day) {
+		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
+			.where(ingredientSalesDailyPriceStat.createdAt.between(
+						day.atStartOfDay(),
+						day.plusDays(1).atStartOfDay()
+					)
+					.and(ingredientSalesDailyPriceStat.marketType
+						.eq(MarketType.ONLINE)
+					)
 			)
-			.orderBy(ingredientSalesDailyPriceStat.ingredient.id.asc())
 			.fetch();
-
-		List<IngredientSalesDailyPriceStat> yesterdaylist = jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
-			.where(ingredientSalesDailyPriceStat.createdAt.year()
-				.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).minusDays(1).getYear())
-				.and(ingredientSalesDailyPriceStat.createdAt.month()
-					.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).minusDays(1).getMonth().getValue()))
-				.and(ingredientSalesDailyPriceStat.createdAt.dayOfMonth()
-					.eq(LocalDateTime.now(ZoneId.of("Asia/Seoul")).minusDays(1).getDayOfMonth())
-					.and(ingredientSalesDailyPriceStat.marketType.eq(MarketType.ONLINE))
-				))
-			.orderBy(ingredientSalesDailyPriceStat.ingredient.id.asc())
-			.fetch();
-
-
-		log.info("#####RPS ASC " + todaylist.size());
-
-		log.info("#####RPS ASC " + todaylist.size());
-
-		log.info("#####RPS ASC " + yesterdaylist.size());
-
-		log.info(LocalDateTime.now().toString());
-		return IntStream.range(0, Math.max(4, Math.min(todaylist.size(), yesterdaylist.size())))
-			.mapToObj(i -> IngredientPriceGap.builder()
-				.currPrice(todaylist.get(i)
-					.getMinPrice())
-				.prevPrice(yesterdaylist.get(i)
-					.getMinPrice())
-				.ingredientId(todaylist.get(i)
-					.getIngredient()
-					.getId()
-				).build())
-			.sorted(asc
-				? Comparator.comparingInt(o -> (o.getPrevPrice() - o.getCurrPrice()))
-				: Comparator.comparingInt(o -> (o.getCurrPrice() - o.getPrevPrice()))
-			)
-			.collect(Collectors.toList());
 	}
 }
