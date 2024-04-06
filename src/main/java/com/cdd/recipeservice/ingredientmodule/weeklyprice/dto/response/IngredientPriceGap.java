@@ -1,12 +1,17 @@
 package com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.response;
 
+import com.cdd.recipeservice.ingredientmodule.ingredient.domain.Ingredient;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
 @Getter
 @Builder
+@NoArgsConstructor
 public class IngredientPriceGap {
 	@JsonProperty("ingredient_id")
 	private int ingredientId;
@@ -14,23 +19,17 @@ public class IngredientPriceGap {
 	private String ingredientName;
 	@JsonProperty("ingredient_image")
 	private String ingredientImage;
+	@JsonProperty("percent")
+	private double percent;
 
-	@JsonProperty("prev_price")
-	private int prevPrice;
-	@JsonProperty("curr_price")
-	private int currPrice;
-
-	public IngredientPriceGap(int ingredientId, String ingredientName, String ingredientImage, int prevPrice,
-		int currPrice) {
-		this.ingredientId = ingredientId;
-		this.ingredientName = ingredientName;
-		this.ingredientImage = ingredientImage;
-		this.prevPrice = prevPrice;
-		this.currPrice = currPrice;
-	}
-
-	public void updateInfo(String ingredientName, String ingredientImage) {
-		this.ingredientName = ingredientName;
-		this.ingredientImage = ingredientImage;
+	public static IngredientPriceGap of(
+		Ingredient ingredient,
+		double percent) {
+		return IngredientPriceGap.builder()
+			.ingredientId(ingredient.getId())
+			.ingredientName(ingredient.getName())
+			.ingredientImage(ingredient.getImg())
+			.percent(percent)
+			.build();
 	}
 }
