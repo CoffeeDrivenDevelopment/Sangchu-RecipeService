@@ -139,13 +139,7 @@ public class RecipeService implements RecipeInfoService {
 				}
 			}
 
-			return RecipeSearchInfo.builder()
-				.id(recipe.getId())
-				.image(recipe.getImage())
-				.name(recipe.getTitle())
-				.isLiked(isLiked)
-				.tags(recipe.getTag())
-				.build();
+			return RecipeSearchInfo.of(recipe, isLiked);
 		}).toList();
 	}
 
