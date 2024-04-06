@@ -21,9 +21,9 @@ import lombok.NoArgsConstructor;
 @RedisHash(timeToLive = 60 * 60 * 24)
 public class IngredientPriceGapList {
 	@Id
-	String key;
+	private String key;
 	@JsonProperty("ingredient_gap_list")
-	List<IngredientPriceGap> ingredientPriceGaps;
+	private List<IngredientPriceGap> ingredientPriceGaps;
 
 	public IngredientPriceGapList(String key) {
 		this.key = key;
@@ -35,7 +35,7 @@ public class IngredientPriceGapList {
 	}
 
 	public IngredientPriceGapList sortAndLimit(int limit, int order) {
-		ingredientPriceGaps.sort((b, a) -> Double.compare(a.getPercent()*order, b.getPercent()*order));
+		ingredientPriceGaps.sort((b, a) -> Double.compare(a.getPercent() * order, b.getPercent() * order));
 		if (ingredientPriceGaps.size() > limit) {
 			ingredientPriceGaps = ingredientPriceGaps.subList(0, limit);
 		}

@@ -66,12 +66,12 @@ public class IngredientGapService {
 		RedisUtils.put(
 			redisTemplate,
 			objectMapper,
-			asc.sortAndLimit(10,1),
+			asc.sortAndLimit(10, 1),
 			KEY + "asc");
 		RedisUtils.put(
 			redisTemplate,
 			objectMapper,
-			desc.sortAndLimit(10,-1),
+			desc.sortAndLimit(10, -1),
 			KEY + "desc");
 	}
 
@@ -106,6 +106,6 @@ public class IngredientGapService {
 			double result = ((double)(todayAvgPrice - yesterdayAvgPrice) / yesterdayAvgPrice) * 100.0;
 			return Math.round(result * 100.0) / 100.0;
 		}
-		return 0.0;
+		return 0.0D;
 	}
 }
