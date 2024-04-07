@@ -32,9 +32,11 @@ public class MarketIngredientLowestPriceUtils {
 	public static List<OnlineMarket> getOnlineMarketPrices(
 		final MarketRepository marketRepository,
 		final int ingredientId,
-		final int limit) {
+		final int limit
+	) {
 		return marketRepository.findMinPriceByIngredientIdAndOnlineMarkets(
 			ingredientId,
-			limit);
+			limit
+		);
 	}
 }

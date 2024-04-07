@@ -1,6 +1,5 @@
 package com.cdd.recipeservice.recipemodule.review.domain;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import com.cdd.recipeservice.global.domain.BaseTime;
@@ -38,11 +37,11 @@ public class CookEat extends BaseTime {
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cook_eat_id")
-	private List<CookEatImage> images = new ArrayList<>();
+	private List<CookEatImage> images;
 
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "cook_eat_id")
-	private List<CookEatLike> likes = new ArrayList<>();
+	private List<CookEatLike> likes;
 
 	public void addImage(CookEatImage image) {
 		images.add(image);
