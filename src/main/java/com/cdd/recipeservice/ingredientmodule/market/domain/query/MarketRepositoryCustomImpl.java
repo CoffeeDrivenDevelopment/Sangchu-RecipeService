@@ -83,7 +83,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
 			.toLocalDate().atStartOfDay();
 		return jpaQueryFactory.selectFrom(marketIngredientSalesPrice)
-			.join(marketIngredientSalesPrice.marketIngredient, marketIngredient)
+			.join(marketIngredientSalesPrice.marketIngredient, marketIngredient).fetchJoin()
 			.join(marketIngredient.market, market).fetchJoin()
 			.where(market.type.eq(MarketType.ONLINE)
 				.and(marketIngredient.ingredient.id.eq(ingredientId))
