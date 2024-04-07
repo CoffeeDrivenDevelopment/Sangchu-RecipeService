@@ -13,6 +13,7 @@ import com.cdd.recipeservice.global.utils.RedisUtils;
 import com.cdd.recipeservice.ingredientmodule.ingredient.domain.IngredientRepository;
 import com.cdd.recipeservice.ingredientmodule.ingredient.dto.response.IngredientInxInfo;
 import com.cdd.recipeservice.ingredientmodule.ingredient.utils.IngredientUtils;
+import com.cdd.recipeservice.ingredientmodule.market.domain.Market;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
@@ -39,16 +40,16 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 @Service
 public class MarketIngredientWeeklyPriceService {
-	@Value("${weekly.price.weeks}")
-	private int[] weeks;
-	@Value("${weekly.price.unit}")
-	private int unit;
 	private final IngredientSalesDailyPriceStatRepository ingredientSalesDailyPriceStatRepository;
 	private final IngredientRepository ingredientRepository;
 	private final MarketRepository marketRepository;
 	private final TargetPriceRepository targetPriceRepository;
 	private final RedisTemplate<byte[], byte[]> redisTemplate;
 	private final ObjectMapper objectMapper;
+	@Value("${weekly.price.weeks}")
+	private int[] weeks;
+	@Value("${weekly.price.unit}")
+	private int unit;
 
 	private void validateMarketType(String type) {
 		if (!"online".equals(type) && !"offline".equals(type)) {
@@ -131,12 +132,23 @@ public class MarketIngredientWeeklyPriceService {
 	}
 
 	public MarketPricePerUserResponse getIngredientPriceOnlineMarket(int memberId, int ingredientId) {
-		List<OnlineMarket> onlineMarkets = marketRepository.findMinPriceByIngredientIdAndOnlineMarkets(ingredientId, 3);
+		List<OnlineMarket> onlineMarkets = marketRepository.findMinPriceByIngredientIdAndOnlineMarkets(
+				ingredientId, 3).stream()
+			.map(marketIngredientSalesPrice -> {
+				Market market = marketIngredientSalesPrice.getMarketIngredient().getMarket();
+				return OnlineMarket.builder()
+					.id(market.getId())
+					.name(market.getName())
+					.price(marketIngredientSalesPrice.getPrice())
+					.link(marketIngredientSalesPrice.getSalesLink())
+					.build();
+			}).toList();
 		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(
 			targetPriceRepository,
 			memberId,
 			ingredientId,
-			0);
+			0
+		);
 
 		int todayMinimumPrice = IngredientSalesDailyPriceStatUtils.findMinPriceByIngredientIdAndMarket(
 			ingredientSalesDailyPriceStatRepository,
@@ -145,15 +157,16 @@ public class MarketIngredientWeeklyPriceService {
 
 		List<Map<Integer, List<WeeklyPrice>>> marketPriceList = new ArrayList<>();
 
-		for (int i = 0; i < onlineMarkets.size(); i++) {
+		for (OnlineMarket onlineMarket : onlineMarkets) {
 			List<WeeklyPrice> weeklyPrices = marketRepository.findWeeklyPriceByIngredientIdAndMarketId(
 				ingredientId,
-				onlineMarkets.get(i).getId()
+				onlineMarket.getId()
 			);
 			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
 				weeklyPrices,
 				weeks,
-				unit);
+				unit
+			);
 			marketPriceList.add(weeklyAvgPrices);
 		}
 		return MarketPricePerUserResponse.of(

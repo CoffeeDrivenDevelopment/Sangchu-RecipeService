@@ -8,12 +8,11 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.List;
 
+import com.cdd.recipeservice.ingredientmodule.market.domain.MarketIngredientSalesPrice;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.market.domain.QAddress;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
-import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.QClosestMarket;
-import com.cdd.recipeservice.ingredientmodule.market.dto.response.QOnlineMarket;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.QWeeklyPrice;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -77,19 +76,13 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	}
 
 	@Override
-	public List<OnlineMarket> findMinPriceByIngredientIdAndOnlineMarkets(
+	public List<MarketIngredientSalesPrice> findMinPriceByIngredientIdAndOnlineMarkets(
 		final int ingredientId,
 		final int limit
 	) {
 		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
 			.toLocalDate().atStartOfDay();
-		return jpaQueryFactory.select(new QOnlineMarket(
-				market.id,
-				market.name,
-				marketIngredientSalesPrice.price,
-				marketIngredientSalesPrice.salesLink
-			))
-			.from(marketIngredientSalesPrice)
+		return jpaQueryFactory.selectFrom(marketIngredientSalesPrice)
 			.join(marketIngredientSalesPrice.marketIngredient, marketIngredient)
 			.join(marketIngredient.market, market).fetchJoin()
 			.where(market.type.eq(MarketType.ONLINE)

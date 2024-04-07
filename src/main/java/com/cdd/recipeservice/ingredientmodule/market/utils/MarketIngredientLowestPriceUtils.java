@@ -3,6 +3,7 @@ package com.cdd.recipeservice.ingredientmodule.market.utils;
 import java.util.Collections;
 import java.util.List;
 
+import com.cdd.recipeservice.ingredientmodule.market.domain.MarketIngredientSalesPrice;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
@@ -29,7 +30,7 @@ public class MarketIngredientLowestPriceUtils {
 		return closestMarkets.subList(0, Math.min(limit, closestMarkets.size()));
 	}
 
-	public static List<OnlineMarket> getOnlineMarketPrices(
+	public static List<MarketIngredientSalesPrice> getOnlineMarketPrices(
 		final MarketRepository marketRepository,
 		final int ingredientId,
 		final int limit
