@@ -1,14 +1,14 @@
 package com.cdd.recipeservice.ingredientmodule.market.dto.response;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.querydsl.core.annotations.QueryProjection;
 
+import lombok.Builder;
 import lombok.Getter;
 
+@Builder
 @Getter
-public class OnlineMarket implements MarketInfoMaker{
+public class OnlineMarket implements MarketInfoMaker {
 	@JsonProperty("market_id")
 	private int id;
 	@JsonProperty("market_name")
@@ -17,6 +17,7 @@ public class OnlineMarket implements MarketInfoMaker{
 	private int price;
 	@JsonProperty("market_link")
 	private String link;
+
 	@QueryProjection
 	public OnlineMarket(int id, String name, int price, String link) {
 		this.id = id;

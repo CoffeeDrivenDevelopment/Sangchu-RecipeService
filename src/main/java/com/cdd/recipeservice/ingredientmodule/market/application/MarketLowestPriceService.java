@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cdd.recipeservice.ingredientmodule.market.domain.Market;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketLowestPriceListResponse;
@@ -38,11 +39,20 @@ public class MarketLowestPriceService {
 	}
 
 	public MarketLowestPriceListResponse<OnlineMarket> getOnlineMarketLowestPrice(int ingredientId) {
-		List<OnlineMarket> onlineMarketPrices = MarketIngredientLowestPriceUtils.getOnlineMarketPrices(
-			marketRepository,
-			ingredientId,
-			10
-		);
-		return MarketLowestPriceListResponse.from(onlineMarketPrices);
+		List<OnlineMarket> list = MarketIngredientLowestPriceUtils.getOnlineMarketPrices(
+				marketRepository,
+				ingredientId,
+				10
+			).stream()
+			.map(marketIngredientSalesPrice -> {
+				Market market = marketIngredientSalesPrice.getMarketIngredient().getMarket();
+				return OnlineMarket.builder()
+					.id(market.getId())
+					.name(market.getName())
+					.price(marketIngredientSalesPrice.getPrice())
+					.link(marketIngredientSalesPrice.getSalesLink())
+					.build();
+			}).toList();
+		return MarketLowestPriceListResponse.from(list);
 	}
 }
