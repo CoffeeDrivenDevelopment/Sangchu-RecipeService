@@ -1,5 +1,6 @@
 package com.cdd.recipeservice.ingredientmodule.weeklyprice.application;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -94,7 +95,16 @@ public class MarketIngredientWeeklyPriceService {
 				unit);
 			marketPriceList.add(weeklyAvgPrices);
 		}
+
+		LocalDateTime updatedAt = RedisUtils.get(
+			redisTemplate,
+			objectMapper,
+			IngredientWeeklyPrice.class,
+			"offline", "-", ingredientId
+		).getUpdateAt();
+
 		return MarketPricePerUserResponse.of(
+			updatedAt,
 			targetPrice,
 			todayMinimumPrice,
 			closestMarkets,
@@ -169,7 +179,15 @@ public class MarketIngredientWeeklyPriceService {
 			);
 			marketPriceList.add(weeklyAvgPrices);
 		}
+		LocalDateTime updatedAt = RedisUtils.get(
+			redisTemplate,
+			objectMapper,
+			IngredientWeeklyPrice.class,
+			"online", "-", ingredientId
+		).getUpdateAt();
+
 		return MarketPricePerUserResponse.of(
+			updatedAt,
 			targetPrice,
 			todayMinimumPrice,
 			onlineMarkets,

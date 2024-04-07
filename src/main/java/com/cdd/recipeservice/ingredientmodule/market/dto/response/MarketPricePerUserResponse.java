@@ -1,7 +1,6 @@
 package com.cdd.recipeservice.ingredientmodule.market.dto.response;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -28,12 +27,13 @@ public class MarketPricePerUserResponse {
 	private List<Map<Integer, List<WeeklyPrice>>> marketPriceList;
 
 	public static <T extends MarketInfoMaker> MarketPricePerUserResponse of(
+		LocalDateTime updatedAt,
 		int targetPrice,
 		int todayMinimumPrice,
 		List<T> markets,
-		List<Map<Integer, List<WeeklyPrice>>> weeklyPriceList){
+		List<Map<Integer, List<WeeklyPrice>>> weeklyPriceList) {
 		MarketPricePerUserResponse marketPricePerUserResponse = MarketPricePerUserResponse.builder()
-			.updateAt(LocalDateTimeUtils.timePattern(LocalDateTime.now(ZoneId.of("Asia/Seoul"))))
+			.updateAt(LocalDateTimeUtils.timePattern(updatedAt))
 			.targetPrice(targetPrice)
 			.todayMinimumPrice(todayMinimumPrice)
 			.marketType(new ArrayList<>())
