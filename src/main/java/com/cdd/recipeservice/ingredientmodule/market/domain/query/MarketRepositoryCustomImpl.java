@@ -18,6 +18,8 @@ import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.jpa.JPAExpressions;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -33,7 +35,6 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	@Override
 	public List<ClosestMarket> findClosestMarketPrices(int ingredientId, double lat, double lng, double distance,
 		int limit) {
-		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return jpaQueryFactory
 			.select(new QClosestMarket(
 					market.id,
@@ -50,7 +51,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 			.join(marketIngredientSalesPrice)
 			.on(marketIngredient.ingredient.id.eq(ingredientId)
 				.and(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id))
-				.and(betweenDays(today, today.plusDays(1L).minusSeconds(1L))
+				.and(marketIngredientSalesPrice.createdAt.eq(isLatestPrice())
 				)
 			)
 			.where(market.type.eq(MarketType.OFFLINE)
@@ -59,6 +60,12 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 			.distinct()
 			.limit(limit)
 			.fetch();
+	}
+
+	private static JPQLQuery<LocalDateTime> isLatestPrice() {
+		return JPAExpressions.select(marketIngredientSalesPrice.createdAt.max())
+			.from(marketIngredientSalesPrice)
+			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredient.id));
 	}
 
 	private BooleanExpression isCloseThan(double lat, double lng, double distance) {
