@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.cdd.recipeservice.infra.member.application.MemberClient;
+import com.cdd.recipeservice.infra.member.dto.MemberCoordinateResponse;
 import com.cdd.recipeservice.ingredientmodule.market.domain.Market;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
@@ -20,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class MarketLowestPriceService {
 	private final MarketRepository marketRepository;
+	private final MemberClient memberClient;
 
 	/**
 	 *
@@ -29,14 +32,14 @@ public class MarketLowestPriceService {
 		final Passport passport,
 		final int ingredientId
 	) {
-
-		// 3km 이내 시장 3개 가져오기
+		MemberCoordinateResponse memberCoordinate = memberClient.findMemberCoordinates(passport);
 		List<ClosestMarket> closestMarketPrices = MarketIngredientLowestPriceUtils.getClosestMarketPrices(
 			marketRepository,
 			ingredientId,
-			0D,
-			0D,
+			memberCoordinate.lat(),
+			memberCoordinate.lng(),
 			3);
+
 		return MarketLowestPriceListResponse.from(closestMarketPrices);
 	}
 
