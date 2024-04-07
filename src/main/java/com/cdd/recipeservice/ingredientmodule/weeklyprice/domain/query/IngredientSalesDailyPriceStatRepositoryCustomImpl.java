@@ -90,7 +90,7 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.createdAt.between(
 						day.atStartOfDay(),
-						day.plusDays(2).atStartOfDay().minusSeconds(1L)
+						day.plusDays(1L).atStartOfDay().minusSeconds(1L)
 					)
 					.and(ingredientSalesDailyPriceStat.marketType
 						.eq(MarketType.ONLINE)
