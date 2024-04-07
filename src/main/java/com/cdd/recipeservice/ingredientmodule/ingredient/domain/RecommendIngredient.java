@@ -32,7 +32,7 @@ public class RecommendIngredient {
 
 	public static RecommendIngredient from(Ingredient ingredient) {
 		return RecommendIngredient.builder()
-			.updatedAt(LocalDateTimeUtils.today("Asia/Seoul"))
+			.updatedAt(LocalDateTimeUtils.today())
 			.ingredients(Ingredients.builder()
 				.id(ingredient.getId())
 				.name(ingredient.getName())

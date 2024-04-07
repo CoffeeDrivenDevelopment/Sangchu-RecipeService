@@ -30,7 +30,7 @@ public class IngredientWeeklyPrice {
 	) {
 		return IngredientWeeklyPrice.builder()
 			.key(type + "-" + id)
-			.updateAt(LocalDateTimeUtils.today("Asia/Seoul"))
+			.updateAt(LocalDateTimeUtils.today())
 			.weeklyPrices(weeklyPrices)
 			.build();
 	}

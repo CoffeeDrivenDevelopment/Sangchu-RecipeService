@@ -12,7 +12,7 @@ public class RecipeLikeMapper {
 		return RecipeLike.builder()
 			.memberId(memberId)
 			.recipe(recipe)
-			.viewedAt(LocalDateTimeUtils.today("Asia/Seoul"))
+			.viewedAt(LocalDateTimeUtils.today())
 			.build();
 	}
 }
