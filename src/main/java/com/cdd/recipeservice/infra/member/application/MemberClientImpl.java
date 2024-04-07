@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.cdd.common.exception.SangChuException;
 import com.cdd.common.exception.ServerErrorCode;
 import com.cdd.recipeservice.infra.config.InfraClientProperties;
+import com.cdd.recipeservice.infra.member.dto.MemberCoordinateResponse;
 import com.cdd.recipeservice.infra.member.dto.MemberInfoResponse;
 import com.cdd.sangchupassport.Passport;
 import com.cdd.sangchupassport.support.SangchuHeader;
@@ -70,5 +71,16 @@ public class MemberClientImpl implements MemberClient {
 			log.warn("\nPassport 문자열 변환 실패 : [{}]", passport);
 			throw new SangChuException(ServerErrorCode.BAD_REQUEST);
 		}
+	}
+
+	@Override
+	public MemberCoordinateResponse findMemberCoordinates(Passport passport) {
+		return WebClient.create(url)
+			.get()
+			.uri("/v1/members/coordinate")
+			.header(SangchuHeader.SANGCHU_PASSPORT.getName(), getWritePassportAsString(passport))
+			.retrieve()
+			.bodyToMono(MemberCoordinateResponse.class)
+			.block();
 	}
 }
