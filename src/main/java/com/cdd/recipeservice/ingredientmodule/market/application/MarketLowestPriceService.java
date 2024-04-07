@@ -11,6 +11,7 @@ import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketLowestPriceListResponse;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
 import com.cdd.recipeservice.ingredientmodule.market.utils.MarketIngredientLowestPriceUtils;
+import com.cdd.sangchupassport.Passport;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,15 +26,16 @@ public class MarketLowestPriceService {
 	 * 사용자 위치 3km이내에서 가장 가깝고 싼 시장 3개 가져오기
 	 */
 	public MarketLowestPriceListResponse<ClosestMarket> getOfflineMarketLowestPrice(
-		final int ingredientId,
-		final double lat,
-		final double lng) {
+		final Passport passport,
+		final int ingredientId
+	) {
+
 		// 3km 이내 시장 3개 가져오기
 		List<ClosestMarket> closestMarketPrices = MarketIngredientLowestPriceUtils.getClosestMarketPrices(
 			marketRepository,
 			ingredientId,
-			lat,
-			lng,
+			0D,
+			0D,
 			3);
 		return MarketLowestPriceListResponse.from(closestMarketPrices);
 	}

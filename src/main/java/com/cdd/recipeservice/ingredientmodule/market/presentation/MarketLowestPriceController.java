@@ -1,13 +1,21 @@
 package com.cdd.recipeservice.ingredientmodule.market.presentation;
 
-import org.springframework.http.*;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.cdd.common.response.*;
-import com.cdd.recipeservice.ingredientmodule.market.application.*;
-import com.cdd.recipeservice.ingredientmodule.market.dto.response.*;
+import com.cdd.common.response.MessageBody;
+import com.cdd.common.response.ResponseEntityFactory;
+import com.cdd.recipeservice.ingredientmodule.market.application.MarketLowestPriceService;
+import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
+import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketLowestPriceListResponse;
+import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
+import com.cdd.sangchupassport.Passport;
+import com.cdd.sangchupassport.support.RequestPassport;
 
-import lombok.*;
+import lombok.RequiredArgsConstructor;
 
 @RequestMapping("/recipe-service")
 @RequiredArgsConstructor
@@ -17,12 +25,12 @@ public class MarketLowestPriceController {
 
 	@GetMapping("/v1/ingredients/{id}/markets/offline/details")
 	public ResponseEntity<MessageBody<MarketLowestPriceListResponse<ClosestMarket>>> getMarketLowestPrice(
-		@PathVariable("id") int ingredientId,
-		@RequestParam(name = "lat", required = true) double lat,
-		@RequestParam(name = "lng", required = true) double lng) {
+		@RequestPassport Passport passport,
+		@PathVariable("id") int ingredientId
+	) {
 		return ResponseEntityFactory.ok(
 			"오프라인 최저가 조회 성공",
-			marketLowestPriceService.getOfflineMarketLowestPrice(ingredientId, lat, lng));
+			marketLowestPriceService.getOfflineMarketLowestPrice(passport, ingredientId));
 	}
 
 	@GetMapping("/v1/ingredients/{id}/markets/online/details")
