@@ -27,13 +27,13 @@ import lombok.RequiredArgsConstructor;
 @Transactional(readOnly = true)
 @Service
 public class RecommendIngredientServiceImpl implements RecommendIngredientService {
+	private final IngredientRepository ingredientRepository;
+	private final RedisTemplate<byte[], byte[]> redisTemplate;
+	private final ObjectMapper objectMapper;
 	@Value("${ingredient.max-size}")
 	private int maxResults;
 	@Value("${ingredient.key}")
 	private String recommendIngredientKey;
-	private final IngredientRepository ingredientRepository;
-	private final RedisTemplate<byte[], byte[]> redisTemplate;
-	private final ObjectMapper objectMapper;
 
 	@Override
 	public List<RecommendIngredient> selectRecommendIngredient(
