@@ -53,7 +53,7 @@ public class IngredientGapService {
 
 	@Scheduled(cron = "0 0 0 * * *")
 	public void saveIngredientPriceGap() {
-		LocalDate today = LocalDateTimeUtils.today("Asia/Seoul").toLocalDate();
+		LocalDate today = LocalDateTimeUtils.today().toLocalDate();
 		List<IngredientSalesDailyPriceStat> todayList =
 			ingredientSalesDailyPriceStatRepository.findIngredientDailyPrice(today);
 		List<IngredientSalesDailyPriceStat> yesterdayList =

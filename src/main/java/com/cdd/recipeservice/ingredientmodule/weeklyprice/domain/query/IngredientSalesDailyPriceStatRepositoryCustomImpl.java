@@ -21,11 +21,10 @@ import lombok.extern.slf4j.Slf4j;
 public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 	implements IngredientSalesDailyPriceStatRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
-	private static final String ZONE = "Asia/Seoul";
 
 	@Override
 	public List<IngredientSalesDailyPriceStat> findByIdTypeAndWeek(PriceSearchCond cond) {
-		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.ingredient.id.eq(cond.getId())
 				.and(ingredientSalesDailyPriceStat.marketType.eq(cond.getType()))
@@ -48,7 +47,7 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 
 	@Override
 	public Optional<Integer> findMinPriceByIngredientIdAndMarket(int ingredientId, MarketType marketType) {
-		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return Optional.ofNullable(jpaQueryFactory
 			.select(ingredientSalesDailyPriceStat.minPrice)
 			.from(ingredientSalesDailyPriceStat)
@@ -63,7 +62,7 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 
 	@Override
 	public List<Integer> findPricesBetweenTodayAnd7DaysAGo(int id) {
-		LocalDateTime today = LocalDateTimeUtils.today(ZONE).toLocalDate().atStartOfDay();
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		LocalDateTime sevenDaysAgo = today.minusDays(7);
 		return jpaQueryFactory.select(ingredientSalesDailyPriceStat.avgPrice)
 			.from(ingredientSalesDailyPriceStat)

@@ -25,7 +25,7 @@ public class MarketLowestPriceListResponse<T> {
 	public static <T> MarketLowestPriceListResponse<T> from(
 		final List<T> markets) {
 		return MarketLowestPriceListResponse.<T>builder()
-			.updateAt(LocalDateTimeUtils.nowTimePattern("Asia/Seoul"))
+			.updateAt(LocalDateTimeUtils.nowTimePattern())
 			.markets(markets)
 			.build();
 	}

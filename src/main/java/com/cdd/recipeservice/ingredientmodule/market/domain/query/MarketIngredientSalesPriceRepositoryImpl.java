@@ -17,7 +17,7 @@ public class MarketIngredientSalesPriceRepositoryImpl implements MarketIngredien
 
 	@Override
 	public Optional<MarketIngredientSalesPrice> findMarketIngredientSalesPriceByToday(long marketIngredientId) {
-		LocalDateTime today = LocalDateTimeUtils.today("Asia/Seoul").toLocalDate().atStartOfDay();
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return Optional.ofNullable(jpaQueryFactory.selectFrom(marketIngredientSalesPrice)
 			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredientId)
 				.and(marketIngredientSalesPrice.createdAt.between(

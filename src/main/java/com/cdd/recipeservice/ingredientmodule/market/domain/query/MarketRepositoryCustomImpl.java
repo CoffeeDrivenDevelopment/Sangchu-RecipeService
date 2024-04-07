@@ -5,9 +5,9 @@ import static com.cdd.recipeservice.ingredientmodule.market.domain.QMarketIngred
 import static com.cdd.recipeservice.ingredientmodule.market.domain.QMarketIngredientSalesPrice.*;
 
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.List;
 
+import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketIngredientSalesPrice;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.market.domain.QAddress;
@@ -18,8 +18,6 @@ import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.jpa.JPAExpressions;
-import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -28,15 +26,14 @@ import lombok.RequiredArgsConstructor;
 public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
-	private static JPQLQuery<LocalDateTime> isLatestPrice() {
-		return JPAExpressions.select(marketIngredientSalesPrice.createdAt.max())
-			.from(marketIngredientSalesPrice)
-			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredient.id));
+	private static BooleanExpression betweenDays(LocalDateTime start, LocalDateTime end) {
+		return marketIngredientSalesPrice.createdAt.between(start, end);
 	}
 
 	@Override
 	public List<ClosestMarket> findClosestMarketPrices(int ingredientId, double lat, double lng, double distance,
 		int limit) {
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return jpaQueryFactory
 			.select(new QClosestMarket(
 					market.id,
@@ -53,7 +50,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 			.join(marketIngredientSalesPrice)
 			.on(marketIngredient.ingredient.id.eq(ingredientId)
 				.and(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id))
-				.and(marketIngredientSalesPrice.createdAt.eq(isLatestPrice())
+				.and(betweenDays(today, today.plusDays(1L).minusSeconds(1L))
 				)
 			)
 			.where(market.type.eq(MarketType.OFFLINE)
@@ -80,15 +77,14 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 		final int ingredientId,
 		final int limit
 	) {
-		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
-			.toLocalDate().atStartOfDay();
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return jpaQueryFactory.selectFrom(marketIngredientSalesPrice)
 			.join(marketIngredientSalesPrice.marketIngredient, marketIngredient).fetchJoin()
 			.join(marketIngredient.market, market).fetchJoin()
 			.where(market.type.eq(MarketType.ONLINE)
 				.and(marketIngredient.ingredient.id.eq(ingredientId))
-				.and(marketIngredientSalesPrice.createdAt.between(today.minusDays(1L).minusSeconds(1L), today)
-				))
+				.and(betweenDays(today, today.plusDays(1L).minusSeconds(1L)))
+			)
 			.orderBy(marketIngredientSalesPrice.price.asc())
 			.limit(limit)
 			.fetch();
@@ -96,6 +92,7 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 
 	@Override
 	public List<WeeklyPrice> findWeeklyPriceByIngredientIdAndMarketId(int ingredientId, int marketId) {
+		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
 		return jpaQueryFactory.select(new QWeeklyPrice(
 				marketIngredientSalesPrice.createdAt,
 				marketIngredientSalesPrice.price
@@ -104,7 +101,9 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 			.innerJoin(marketIngredient)
 			.on(marketIngredient.ingredient.id.eq(ingredientId))
 			.innerJoin(marketIngredientSalesPrice)
-			.on(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id))
+			.on(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id)
+				.and(betweenDays(today.minusWeeks(4L), today.plusDays(1L).minusSeconds(1L)))
+			)
 			.orderBy(marketIngredientSalesPrice.createdAt.desc())
 			.limit(28)
 			.fetch();

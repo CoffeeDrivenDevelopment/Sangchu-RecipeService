@@ -10,9 +10,11 @@ public class LocalDateTimeUtils {
 	private LocalDateTimeUtils() {
 		throw new CallConstructorException();
 	}
-
-	public static LocalDateTime today(String zoneId){
-		return LocalDateTime.now(ZoneId.of(zoneId));
+	public static LocalDateTime today(String... zoneId){
+		if(zoneId.length == 0) {
+			return LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+		}
+		return LocalDateTime.now(ZoneId.of(zoneId[0]));
 	}
 	public static String pattern(LocalDateTime time) {
 		return time.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일"));
@@ -22,7 +24,7 @@ public class LocalDateTimeUtils {
 		return time.format(DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 HH시 mm분 ss초"));
 	}
 
-	public static String nowTimePattern(String zoneId) {
+	public static String nowTimePattern(String... zoneId) {
 		return timePattern(today(zoneId));
 	}
 }
