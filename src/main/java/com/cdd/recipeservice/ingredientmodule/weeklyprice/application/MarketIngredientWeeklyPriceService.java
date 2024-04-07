@@ -193,9 +193,10 @@ public class MarketIngredientWeeklyPriceService {
 	}
 
 	private int getTodayMinimumPrice(List<Map<Integer, List<WeeklyPrice>>> marketPriceList) {
-		if(marketPriceList.isEmpty()) {
+		List<WeeklyPrice> weeklyPrices = marketPriceList.get(0).get(weeks[0]);
+		if(weeklyPrices.isEmpty()) {
 			return 0;
 		}
-		return marketPriceList.get(0).get(weeks[0]).get(6).getPrice();
+		return weeklyPrices.get(weeklyPrices.size()-1).getPrice();
 	}
 }

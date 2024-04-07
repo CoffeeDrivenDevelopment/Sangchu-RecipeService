@@ -42,11 +42,18 @@ public class IngredientWeeklyPriceUtils {
 		int unit) {
 		Map<Integer, List<WeeklyPrice>> weeklyPrices = new HashMap<>();
 
-		LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+		// LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 		for (int week : weeks) {
-			List<WeeklyPrice> pricesPerWeek = initializeWeeklyPrices(week, today, unit);
-			sumPrices(pricesPerWeek, ingredientSalesPrices, week);
-			averagePrices(pricesPerWeek, week);
+			List<WeeklyPrice> pricesPerWeek = new ArrayList<>();
+			for (int day = 0; day < unit * week; day += week) {
+				// List<WeeklyPrice> pricesPerWeek = initializeWeeklyPrices(week, today, unit);
+				// sumPrices(pricesPerWeek, ingredientSalesPrices, week);
+				// averagePrices(pricesPerWeek, week);
+				if(day >= ingredientSalesPrices.size()) {
+					break;
+				}
+				pricesPerWeek.add((WeeklyPrice)ingredientSalesPrices.get(day));
+			}
 			Collections.sort(pricesPerWeek, Comparator.comparing(WeeklyPrice::getDate));
 			weeklyPrices.put(week, pricesPerWeek);
 		}

@@ -105,12 +105,15 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 				marketIngredientSalesPrice.price
 			))
 			.from(market)
-			.innerJoin(marketIngredient)
-			.on(marketIngredient.ingredient.id.eq(ingredientId))
-			.innerJoin(marketIngredientSalesPrice)
+			.join(marketIngredient)
+			.on(marketIngredient.market.id.eq(marketId)
+				.and(marketIngredient.ingredient.id.eq(ingredientId))
+			)
+			.join(marketIngredientSalesPrice)
 			.on(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id)
 				.and(betweenDays(today.minusWeeks(4L), today.plusDays(1L).minusSeconds(1L)))
 			)
+			.where(market.id.eq(marketId))
 			.orderBy(marketIngredientSalesPrice.createdAt.desc())
 			.limit(28)
 			.fetch();
