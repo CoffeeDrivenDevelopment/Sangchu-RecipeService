@@ -1,5 +1,6 @@
 package com.cdd.recipeservice.ingredientmodule.ingredient.domain;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.data.redis.core.RedisHash;
@@ -24,11 +25,14 @@ import lombok.NoArgsConstructor;
 public class RecommendIngredient {
 	@Id
 	private String key;
+	@JsonProperty("updatedAt")
+	private LocalDateTime updatedAt;
 	@JsonProperty("ingredients")
 	private Ingredients ingredients;
 
 	public static RecommendIngredient from(Ingredient ingredient) {
 		return RecommendIngredient.builder()
+			.updatedAt(LocalDateTimeUtils.today("Asia/Seoul"))
 			.ingredients(Ingredients.builder()
 				.id(ingredient.getId())
 				.name(ingredient.getName())

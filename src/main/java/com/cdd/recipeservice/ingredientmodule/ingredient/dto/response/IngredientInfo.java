@@ -24,7 +24,7 @@ public class IngredientInfo {
 
 	public static IngredientInfo from(List<RecommendIngredient> recommendIngredient) {
 		return IngredientInfo.builder()
-			.updateAt(LocalDateTimeUtils.nowTimePattern("Asia/Seoul"))
+			.updateAt(LocalDateTimeUtils.timePattern(recommendIngredient.get(0).getUpdatedAt()))
 			.ingredients(recommendIngredient)
 			.build();
 	}
