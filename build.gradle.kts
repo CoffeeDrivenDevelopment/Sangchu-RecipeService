@@ -43,6 +43,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-redis-reactive")
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     /* Spring Cloud */
     implementation("org.springframework.cloud:spring-cloud-starter")
@@ -111,18 +112,18 @@ tasks.jacocoTestReport {
 
 
     classDirectories.setFrom(
-            files(classDirectories.files.map {
-                fileTree(it).apply {
-                    exclude(
-                            "**/*Application*",
-                            "**/*Exception*",
-                            "**/BaseEntity*",
-                            "**/ControllerAdvice*",
-                            "**/dto/**",
-                            "**/cond/**",
-                    )
-                }
-            })
+        files(classDirectories.files.map {
+            fileTree(it).apply {
+                exclude(
+                    "**/*Application*",
+                    "**/*Exception*",
+                    "**/BaseEntity*",
+                    "**/ControllerAdvice*",
+                    "**/dto/**",
+                    "**/cond/**",
+                )
+            }
+        })
     )
 
 
@@ -143,12 +144,12 @@ tasks.jacocoTestCoverageVerification {
             }
 
             excludes = listOf(
-                    "**/*Application*",
-                    "**/*Exception*",
-                    "**/BaseEntity*",
-                    "**/ControllerAdvice*",
-                    "**/dto/**",
-                    "**/cond/**",
+                "**/*Application*",
+                "**/*Exception*",
+                "**/BaseEntity*",
+                "**/ControllerAdvice*",
+                "**/dto/**",
+                "**/cond/**",
             )
         }
     }
