@@ -16,7 +16,6 @@ import com.cdd.recipeservice.ingredientmodule.ingredient.dto.response.Ingredient
 import com.cdd.recipeservice.ingredientmodule.ingredient.utils.IngredientUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.Market;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketRepository;
-import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.ClosestMarket;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.MarketPricePerUserResponse;
 import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
@@ -31,7 +30,6 @@ import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond.PriceSearchCo
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.response.IngredientWeeklyPriceResponse;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.exception.WeeklyPriceErrorCode;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.exception.WeeklyPriceException;
-import com.cdd.recipeservice.ingredientmodule.weeklyprice.utils.IngredientSalesDailyPriceStatUtils;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.utils.IngredientWeeklyPriceUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -79,11 +77,10 @@ public class MarketIngredientWeeklyPriceService {
 			lat,
 			lng,
 			2);
+
 		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(targetPriceRepository, memberId, ingredientId,
 			0);
-		int todayMinimumPrice = IngredientSalesDailyPriceStatUtils.findMinPriceByIngredientIdAndMarket(
-			ingredientSalesDailyPriceStatRepository,
-			ingredientId, MarketType.OFFLINE);
+
 		List<Map<Integer, List<WeeklyPrice>>> marketPriceList = new ArrayList<>();
 		for (int i = 0; i < closestMarkets.size(); i++) {
 			List<WeeklyPrice> weeklyPrices = marketRepository.findWeeklyPriceByIngredientIdAndMarketId(
@@ -95,6 +92,8 @@ public class MarketIngredientWeeklyPriceService {
 				unit);
 			marketPriceList.add(weeklyAvgPrices);
 		}
+
+		int todayMinimumPrice = getTodayMinimumPrice(marketPriceList);
 
 		LocalDateTime updatedAt = RedisUtils.get(
 			redisTemplate,
@@ -153,17 +152,13 @@ public class MarketIngredientWeeklyPriceService {
 					.link(marketIngredientSalesPrice.getSalesLink())
 					.build();
 			}).toList();
+
 		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(
 			targetPriceRepository,
 			memberId,
 			ingredientId,
 			0
 		);
-
-		int todayMinimumPrice = IngredientSalesDailyPriceStatUtils.findMinPriceByIngredientIdAndMarket(
-			ingredientSalesDailyPriceStatRepository,
-			ingredientId,
-			MarketType.ONLINE);
 
 		List<Map<Integer, List<WeeklyPrice>>> marketPriceList = new ArrayList<>();
 
@@ -179,6 +174,9 @@ public class MarketIngredientWeeklyPriceService {
 			);
 			marketPriceList.add(weeklyAvgPrices);
 		}
+
+		int todayMinimumPrice = getTodayMinimumPrice(marketPriceList);
+
 		LocalDateTime updatedAt = RedisUtils.get(
 			redisTemplate,
 			objectMapper,
@@ -192,5 +190,12 @@ public class MarketIngredientWeeklyPriceService {
 			todayMinimumPrice,
 			onlineMarkets,
 			marketPriceList);
+	}
+
+	private int getTodayMinimumPrice(List<Map<Integer, List<WeeklyPrice>>> marketPriceList) {
+		if(marketPriceList.isEmpty()) {
+			return 0;
+		}
+		return marketPriceList.get(0).get(weeks[0]).get(6).getPrice();
 	}
 }
