@@ -9,10 +9,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class TargetPriceUtils {
 	public static int findByMemberIdAndIngredientId(
-		TargetPriceRepository targetPriceRepository,
-		int memberId,
-		int ingredientId,
-	int orElse) {
+		final TargetPriceRepository targetPriceRepository,
+		final int memberId,
+		final int ingredientId,
+		final int orElse
+	) {
 		return targetPriceRepository.findByMemberIdAndIngredientId(memberId, ingredientId)
 			.map(TargetPrice::getPrice)
 			.orElse(orElse);

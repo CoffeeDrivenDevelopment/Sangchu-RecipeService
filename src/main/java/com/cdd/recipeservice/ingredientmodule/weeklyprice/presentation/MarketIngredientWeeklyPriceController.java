@@ -25,21 +25,19 @@ public class MarketIngredientWeeklyPriceController {
 		@PathVariable("type") String type,
 		@RequestParam(name = "week", required = false, defaultValue = "4") int week) {
 
-		return ResponseEntityFactory.ok(type+" 가격 상세 조회 성공",
+		return ResponseEntityFactory.ok(type + " 가격 상세 조회 성공",
 			marketIngredientWeeklyPriceService.getWeeklyPrice(id, type, week));
 	}
 
 	@GetMapping("/v1/ingredients/{id}/markets/prices/offline")
 	public ResponseEntity<MessageBody<MarketPricePerUserResponse>> getIngredientPriceOfflineMarket(
 		@RequestPassport Passport passport,
-		@PathVariable("id") int ingredientId,
-		@RequestParam(name = "lat", required = true) double lat,
-		@RequestParam(name = "lng", required = true) double lng) {
+		@PathVariable("id") int ingredientId
+	) {
 		MarketPricePerUserResponse marketPricePerUserResponse = marketIngredientWeeklyPriceService.getIngredientPriceOfflineMarket(
-			passport.getMemberId(),
-			ingredientId,
-			lat,
-			lng);
+			passport,
+			ingredientId
+		);
 		return ResponseEntityFactory.ok("오프라인 가격 분석 조회 성공", marketPricePerUserResponse);
 	}
 

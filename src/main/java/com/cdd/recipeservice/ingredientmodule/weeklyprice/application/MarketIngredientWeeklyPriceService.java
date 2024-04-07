@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.cdd.recipeservice.global.utils.RedisUtils;
+import com.cdd.recipeservice.infra.member.application.MemberClient;
+import com.cdd.recipeservice.infra.member.dto.MemberCoordinateResponse;
 import com.cdd.recipeservice.ingredientmodule.ingredient.domain.IngredientRepository;
 import com.cdd.recipeservice.ingredientmodule.ingredient.dto.response.IngredientInxInfo;
 import com.cdd.recipeservice.ingredientmodule.ingredient.utils.IngredientUtils;
@@ -31,6 +33,7 @@ import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.response.Ingredien
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.exception.WeeklyPriceErrorCode;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.exception.WeeklyPriceException;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.utils.IngredientWeeklyPriceUtils;
+import com.cdd.sangchupassport.Passport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -45,6 +48,7 @@ public class MarketIngredientWeeklyPriceService {
 	private final TargetPriceRepository targetPriceRepository;
 	private final RedisTemplate<byte[], byte[]> redisTemplate;
 	private final ObjectMapper objectMapper;
+	private final MemberClient memberClient;
 	@Value("${weekly.price.weeks}")
 	private int[] weeks;
 	@Value("${weekly.price.unit}")
@@ -69,23 +73,32 @@ public class MarketIngredientWeeklyPriceService {
 			calculatePercent(data));
 	}
 
-	public MarketPricePerUserResponse getIngredientPriceOfflineMarket(int memberId, int ingredientId, double lat,
-		double lng) {
+	public MarketPricePerUserResponse getIngredientPriceOfflineMarket(
+		final Passport passport,
+		final int ingredientId
+	) {
+		MemberCoordinateResponse memberCoordinate = memberClient.findMemberCoordinates(passport);
+
 		List<ClosestMarket> closestMarkets = MarketIngredientLowestPriceUtils.getClosestMarketPrices(
 			marketRepository,
 			ingredientId,
-			lat,
-			lng,
-			2);
+			memberCoordinate.lat(),
+			memberCoordinate.lng(),
+			2
+		);
 
-		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(targetPriceRepository, memberId, ingredientId,
-			0);
+		int targetPrice = TargetPriceUtils.findByMemberIdAndIngredientId(
+			targetPriceRepository,
+			passport.getMemberId(),
+			ingredientId,
+			0
+		);
 
 		List<Map<Integer, List<WeeklyPrice>>> marketPriceList = new ArrayList<>();
-		for (int i = 0; i < closestMarkets.size(); i++) {
+		for (ClosestMarket closestMarket : closestMarkets) {
 			List<WeeklyPrice> weeklyPrices = marketRepository.findWeeklyPriceByIngredientIdAndMarketId(
 				ingredientId,
-				closestMarkets.get(i).getId());
+				closestMarket.getId());
 			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
 				weeklyPrices,
 				weeks,
@@ -107,7 +120,8 @@ public class MarketIngredientWeeklyPriceService {
 			targetPrice,
 			todayMinimumPrice,
 			closestMarkets,
-			marketPriceList);
+			marketPriceList
+		);
 	}
 
 	private double calculatePercent(List<WeeklyPrice> data) {
@@ -194,9 +208,9 @@ public class MarketIngredientWeeklyPriceService {
 
 	private int getTodayMinimumPrice(List<Map<Integer, List<WeeklyPrice>>> marketPriceList) {
 		List<WeeklyPrice> weeklyPrices = marketPriceList.get(0).get(weeks[0]);
-		if(weeklyPrices.isEmpty()) {
+		if (weeklyPrices.isEmpty()) {
 			return 0;
 		}
-		return weeklyPrices.get(weeklyPrices.size()-1).getPrice();
+		return weeklyPrices.get(weeklyPrices.size() - 1).getPrice();
 	}
 }
