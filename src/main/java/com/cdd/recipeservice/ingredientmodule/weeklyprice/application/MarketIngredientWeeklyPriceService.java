@@ -22,7 +22,6 @@ import com.cdd.recipeservice.ingredientmodule.market.dto.response.OnlineMarket;
 import com.cdd.recipeservice.ingredientmodule.market.utils.MarketIngredientLowestPriceUtils;
 import com.cdd.recipeservice.ingredientmodule.targetprice.domain.TargetPriceRepository;
 import com.cdd.recipeservice.ingredientmodule.targetprice.utils.TargetPriceUtils;
-import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStatRepository;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientWeeklyPrice;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
@@ -86,7 +85,7 @@ public class MarketIngredientWeeklyPriceService {
 			List<WeeklyPrice> weeklyPrices = marketRepository.findWeeklyPriceByIngredientIdAndMarketId(
 				ingredientId,
 				closestMarkets.get(i).getId());
-			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
+			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.makeWeeklyGraph(
 				weeklyPrices,
 				weeks,
 				unit);
@@ -125,9 +124,9 @@ public class MarketIngredientWeeklyPriceService {
 		for (; id <= endId; id++) {
 
 			PriceSearchCond cond = new PriceSearchCond(id, type, 4L);
-			List<IngredientSalesDailyPriceStat> ingredientSalesPriceList = ingredientSalesDailyPriceStatRepository
+			List<WeeklyPrice> ingredientSalesPriceList = ingredientSalesDailyPriceStatRepository
 				.findByIdTypeAndWeek(cond);
-			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
+			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.makeWeeklyAvgPrices(
 				ingredientSalesPriceList,
 				weeks,
 				unit);
@@ -167,7 +166,7 @@ public class MarketIngredientWeeklyPriceService {
 				ingredientId,
 				onlineMarket.getId()
 			);
-			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.generateWeeklyPrice(
+			Map<Integer, List<WeeklyPrice>> weeklyAvgPrices = IngredientWeeklyPriceUtils.makeWeeklyGraph(
 				weeklyPrices,
 				weeks,
 				unit
@@ -194,9 +193,9 @@ public class MarketIngredientWeeklyPriceService {
 
 	private int getTodayMinimumPrice(List<Map<Integer, List<WeeklyPrice>>> marketPriceList) {
 		List<WeeklyPrice> weeklyPrices = marketPriceList.get(0).get(weeks[0]);
-		if(weeklyPrices.isEmpty()) {
+		if (weeklyPrices.isEmpty()) {
 			return 0;
 		}
-		return weeklyPrices.get(weeklyPrices.size()-1).getPrice();
+		return weeklyPrices.get(weeklyPrices.size() - 1).getPrice();
 	}
 }

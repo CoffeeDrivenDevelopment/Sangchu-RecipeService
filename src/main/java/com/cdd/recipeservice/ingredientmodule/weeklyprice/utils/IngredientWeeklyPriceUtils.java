@@ -3,57 +3,48 @@ package com.cdd.recipeservice.ingredientmodule.weeklyprice.utils;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.*;
-import java.util.function.IntFunction;
 
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.PriceCalculator;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 
-import io.netty.util.internal.ThreadLocalRandom;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IngredientWeeklyPriceUtils {
-
-	public static <T> List<T> generateIngredientSalesPriceDummyData(IntFunction<T> constructorFunction, int num) {
-		List<T> list = new ArrayList<>();
-
-		for (int i = 0; i < num; i++) {
-			list.add(constructorFunction.apply(makeRandomPrice()));
-		}
-		return list;
-	}
-
-	public static int makeRandomPrice() {
-		return ThreadLocalRandom.current().nextInt(100, 20001);
-	}
-
-	public static <T extends PriceCalculator> Map<Integer, List<WeeklyPrice>> generateWeeklyPrice(
-		List<T> ingredientSalesPrices,
+	public static Map<Integer, List<WeeklyPrice>> makeWeeklyGraph(
+		List<WeeklyPrice> ingredientSalesPrices,
 		int[] weeks,
-		int unit) {
-		return makeWeeklyAvgPrices(ingredientSalesPrices, weeks, unit);
+		int unit
+	) {
+		Map<Integer, List<WeeklyPrice>> weeklyPrices = new HashMap<>();
 
+		for (int week : weeks) {
+			List<WeeklyPrice> pricesPerWeek = new ArrayList<>();
+			for (int day = 0; day < unit * week; day += week) {
+				if (day >= ingredientSalesPrices.size()) {
+					break;
+				}
+				pricesPerWeek.add(ingredientSalesPrices.get(day));
+			}
+			Collections.sort(pricesPerWeek, Comparator.comparing(WeeklyPrice::getDate));
+			weeklyPrices.put(week, pricesPerWeek);
+		}
+
+		return weeklyPrices;
 	}
 
-	private static <T extends PriceCalculator> Map<Integer, List<WeeklyPrice>> makeWeeklyAvgPrices(
-		List<T> ingredientSalesPrices,
+	public static Map<Integer, List<WeeklyPrice>> makeWeeklyAvgPrices(
+		List<WeeklyPrice> ingredientSalesPrices,
 		int[] weeks,
 		int unit) {
 		Map<Integer, List<WeeklyPrice>> weeklyPrices = new HashMap<>();
 
-		// LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+		LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
 		for (int week : weeks) {
-			List<WeeklyPrice> pricesPerWeek = new ArrayList<>();
-			for (int day = 0; day < unit * week; day += week) {
-				// List<WeeklyPrice> pricesPerWeek = initializeWeeklyPrices(week, today, unit);
-				// sumPrices(pricesPerWeek, ingredientSalesPrices, week);
-				// averagePrices(pricesPerWeek, week);
-				if(day >= ingredientSalesPrices.size()) {
-					break;
-				}
-				pricesPerWeek.add((WeeklyPrice)ingredientSalesPrices.get(day));
-			}
+			List<WeeklyPrice> pricesPerWeek = initializeWeeklyPrices(week, today, unit);
+			sumPrices(pricesPerWeek, ingredientSalesPrices, week);
+			averagePrices(pricesPerWeek, week);
 			Collections.sort(pricesPerWeek, Comparator.comparing(WeeklyPrice::getDate));
 			weeklyPrices.put(week, pricesPerWeek);
 		}
@@ -64,7 +55,7 @@ public class IngredientWeeklyPriceUtils {
 	private static List<WeeklyPrice> initializeWeeklyPrices(int week, LocalDate startDate, int unit) {
 		List<WeeklyPrice> pricesPerWeek = new ArrayList<>();
 		for (int i = 0; i < unit; i++) {
-			pricesPerWeek.add(new WeeklyPrice(startDate.minusDays(i * week)));
+			pricesPerWeek.add(new WeeklyPrice(startDate.minusDays((long)i * week)));
 		}
 		return pricesPerWeek;
 	}

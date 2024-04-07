@@ -6,10 +6,11 @@ import java.util.Optional;
 
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
+import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond.PriceSearchCond;
 
 public interface IngredientSalesDailyPriceStatRepositoryCustom {
-	List<IngredientSalesDailyPriceStat> findByIdTypeAndWeek(PriceSearchCond cond);
+	List<WeeklyPrice> findByIdTypeAndWeek(PriceSearchCond cond);
 
 	Optional<Integer> findAvgPriceByIngredientId(int ingredientId);
 

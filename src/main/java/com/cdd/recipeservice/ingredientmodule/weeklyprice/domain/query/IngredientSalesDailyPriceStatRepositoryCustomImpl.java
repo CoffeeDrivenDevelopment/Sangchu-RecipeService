@@ -10,6 +10,8 @@ import java.util.Optional;
 import com.cdd.recipeservice.global.utils.LocalDateTimeUtils;
 import com.cdd.recipeservice.ingredientmodule.market.domain.MarketType;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.IngredientSalesDailyPriceStat;
+import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.QWeeklyPrice;
+import com.cdd.recipeservice.ingredientmodule.weeklyprice.domain.WeeklyPrice;
 import com.cdd.recipeservice.ingredientmodule.weeklyprice.dto.cond.PriceSearchCond;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -23,9 +25,14 @@ public class IngredientSalesDailyPriceStatRepositoryCustomImpl
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<IngredientSalesDailyPriceStat> findByIdTypeAndWeek(PriceSearchCond cond) {
+	public List<WeeklyPrice> findByIdTypeAndWeek(PriceSearchCond cond) {
 		LocalDateTime today = LocalDateTimeUtils.today().toLocalDate().atStartOfDay();
-		return jpaQueryFactory.selectFrom(ingredientSalesDailyPriceStat)
+		return jpaQueryFactory.select(new QWeeklyPrice(
+					ingredientSalesDailyPriceStat.createdAt,
+					ingredientSalesDailyPriceStat.avgPrice
+				)
+			)
+			.from(ingredientSalesDailyPriceStat)
 			.where(ingredientSalesDailyPriceStat.ingredient.id.eq(cond.getId())
 				.and(ingredientSalesDailyPriceStat.marketType.eq(cond.getType()))
 				.and(ingredientSalesDailyPriceStat.createdAt.between(cond.getWeek(),
