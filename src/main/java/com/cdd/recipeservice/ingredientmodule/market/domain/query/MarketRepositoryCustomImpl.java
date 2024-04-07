@@ -29,6 +29,12 @@ import lombok.RequiredArgsConstructor;
 public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 	private final JPAQueryFactory jpaQueryFactory;
 
+	private static JPQLQuery<LocalDateTime> isLatestPrice() {
+		return JPAExpressions.select(marketIngredientSalesPrice.createdAt.max())
+			.from(marketIngredientSalesPrice)
+			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredient.id));
+	}
+
 	@Override
 	public List<ClosestMarket> findClosestMarketPrices(int ingredientId, double lat, double lng, double distance,
 		int limit) {
@@ -59,12 +65,6 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 			.fetch();
 	}
 
-	private static JPQLQuery<LocalDateTime> isLatestPrice() {
-		return JPAExpressions.select(marketIngredientSalesPrice.createdAt.max())
-			.from(marketIngredientSalesPrice)
-			.where(marketIngredientSalesPrice.marketIngredient.id.eq(marketIngredient.id));
-	}
-
 	private BooleanExpression isCloseThan(double lat, double lng, double distance) {
 		return getMarketDist(market.address, lat, lng).loe(distance);
 	}
@@ -78,8 +78,8 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 
 	@Override
 	public List<OnlineMarket> findMinPriceByIngredientIdAndOnlineMarkets(
-		int ingredientId,
-		int limit
+		final int ingredientId,
+		final int limit
 	) {
 		LocalDateTime today = LocalDateTime.now(ZoneId.of("Asia/Seoul"))
 			.toLocalDate().atStartOfDay();
@@ -89,18 +89,13 @@ public class MarketRepositoryCustomImpl implements MarketRepositoryCustom {
 				marketIngredientSalesPrice.price,
 				marketIngredientSalesPrice.salesLink
 			))
-			.from(market)
-			.innerJoin(marketIngredient)
-			.on(marketIngredient.ingredient.id.eq(ingredientId))
-			.innerJoin(marketIngredientSalesPrice)
-			.on(marketIngredient.id.eq(marketIngredientSalesPrice.marketIngredient.id))
+			.from(marketIngredientSalesPrice)
+			.join(marketIngredientSalesPrice.marketIngredient, marketIngredient)
+			.join(marketIngredient.market, market).fetchJoin()
 			.where(market.type.eq(MarketType.ONLINE)
-				.and(marketIngredientSalesPrice.createdAt.between(
-						today,
-						today.plusDays(2L).minusSeconds(1L)
-					)
-				)
-			)
+				.and(marketIngredient.ingredient.id.eq(ingredientId))
+				.and(marketIngredientSalesPrice.createdAt.between(today.minusDays(1L).minusSeconds(1L), today)
+				))
 			.orderBy(marketIngredientSalesPrice.price.asc())
 			.limit(limit)
 			.fetch();

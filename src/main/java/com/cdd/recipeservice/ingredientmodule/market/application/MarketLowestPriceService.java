@@ -41,7 +41,8 @@ public class MarketLowestPriceService {
 		List<OnlineMarket> onlineMarketPrices = MarketIngredientLowestPriceUtils.getOnlineMarketPrices(
 			marketRepository,
 			ingredientId,
-			Integer.MAX_VALUE);
+			10
+		);
 		return MarketLowestPriceListResponse.from(onlineMarketPrices);
 	}
 }
