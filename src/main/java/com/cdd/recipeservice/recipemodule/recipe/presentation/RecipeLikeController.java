@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.*;
 
 import com.cdd.common.response.MessageBody;
 import com.cdd.common.response.ResponseEntityFactory;
-import com.cdd.recipeservice.recipemodule.recipe.application.RecipeLikeUpdateService;
 import com.cdd.recipeservice.recipemodule.recipe.application.RecipeLikeLoadService;
+import com.cdd.recipeservice.recipemodule.recipe.application.RecipeLikeUpdateService;
 import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeLikeResponse;
 import com.cdd.recipeservice.recipemodule.recipe.dto.response.RecipeSearchResponse;
 import com.cdd.sangchupassport.Passport;
@@ -41,13 +41,12 @@ public class RecipeLikeController {
 		RecipeLikeResponse response = recipeLikeUpdateService.delete(passport.getMemberId(), recipeId);
 		return ResponseEntityFactory.ok("레시피 좋아요 삭제에 성공하였습니다", response);
 	}
-	
-	
+
 	@GetMapping("/v1/likes/{member_id}")
 	public ResponseEntity<MessageBody<RecipeSearchResponse>> getLikeList(
 		@PathVariable("member_id") int memberId,
-		@RequestParam(name="page" , required = false, defaultValue = "1") int page) {
-		Pageable pageable = PageRequest.of(page-1, 10, Sort.by("createdAt").descending());
+		@RequestParam(name = "page", required = false, defaultValue = "1") int page) {
+		Pageable pageable = PageRequest.of(page - 1, 10, Sort.by("createdAt").descending());
 		RecipeSearchResponse response = recipeLikeLoadService.getLikeRecipeList(memberId, pageable);
 		return ResponseEntityFactory.ok("좋아요 리스트 조회 성공", response);
 	}

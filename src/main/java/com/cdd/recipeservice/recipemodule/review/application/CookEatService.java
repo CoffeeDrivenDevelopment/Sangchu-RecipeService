@@ -117,7 +117,7 @@ public class CookEatService implements CookEatModifyService, CookEatLoadService 
 			.mapToLong(CookEat::getId)
 			.min()
 			.orElse(0L);
-		boolean hasMore = cookEatRepository.hasMoreCookEatById((long)cond.last(), recipeId);
+		boolean hasMore = cookEatRepository.hasMoreCookEatById(cond.last(), recipeId);
 		long totalCount = cookEatRepository.findTotalCountByRecipeId(recipeId);
 		List<CookEat> likedCookEats = CookEatLikeServiceUtils.isLikedIds(cookEatLikeRepository,
 				passport.getMemberId(),
